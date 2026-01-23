@@ -29,6 +29,11 @@ export interface ForecastHour {
         degrees: number;
         unit?: string;
     };
+    // Actual API field name (not apparentTemperature)
+    feelsLikeTemperature?: {
+        degrees: number;
+        unit?: string;
+    };
     dewPoint?: {
         degrees: number;
         unit?: string;
@@ -38,20 +43,22 @@ export interface ForecastHour {
         unit?: string;
     };
 
-    // Precipitation
+    // Precipitation - actual API has probability as nested object
     precipitation?: {
-        probability: number;
-        type?: string;
+        probability?: {
+            type?: string;   // NONE, RAIN, SNOW, FREEZING_RAIN, etc.
+            percent: number; // 0-100
+        };
+        type?: string;       // Fallback location for type
         qpf?: { quantity: number; unit?: string };      // Liquid equivalent
         snowQpf?: { quantity: number; unit?: string };  // Snow liquid equivalent
     };
 
-    // Wind
+    // Wind - actual API has nested value objects
     wind?: {
-        speed: number;
-        gust: number;
-        direction?: number;
-        directionCardinal?: string;
+        speed?: { value: number; unit?: string } | number;
+        gust?: { value: number; unit?: string } | number;
+        direction?: { degrees: number; cardinal?: string } | number;
     };
 
     // Ice and Snow
@@ -78,13 +85,23 @@ export interface ForecastHour {
         value: number;
         unit?: string;
     };
+    // Actual API uses airPressure
+    airPressure?: {
+        meanSeaLevelMillibars: number;
+    };
 
     // Conditions
     uvIndex?: {
         value: number;
         category?: string;
     } | number;
-    weatherCondition?: string; // Or object structure
+    // Actual API has nested description object
+    weatherCondition?: string | {
+        iconBaseUri?: string;
+        description?: { text: string; languageCode?: string } | string;
+        type?: string;  // e.g., "CLOUDY", "LIGHT_RAIN"
+        value?: string; // Fallback
+    };
     weatherCode?: number;
     isDaytime?: boolean;
 
@@ -144,8 +161,8 @@ export interface ChartDataPoint {
 export interface ForecastMetrics {
     dateRange: string;
     maxRisk: number;
-    maxIce: number;
-    provisionalMaxIce: number;
+    totalIce: number;
+    provisionalTotalIce: number;
     minTemp: number;
     maxTemp: number;
     avgWindGust: number;

@@ -23,7 +23,9 @@ export function RiskCharts({ data }: RiskChartsProps) {
     const chartData = data.map(d => ({
         ...d,
         // Display whichever is higher: The API's forecast or our thermodynamic calculation
-        displayIce: Math.max(d.iceThickness, d.provisionalIce)
+        displayIce: Math.max(d.iceThickness, d.provisionalIce),
+        // Fix for double counting: If type is SNOW, don't show precipAmount as Rain
+        rainAmount: (d.precipType === 'SNOW') ? 0 : d.precipAmount
     }));
 
     // Find distinct days for background shading
@@ -43,6 +45,17 @@ export function RiskCharts({ data }: RiskChartsProps) {
     // Close the last day
     if (days.length > 0) {
         days[days.length - 1].end = data[data.length - 1].label;
+    }
+    const maxPrecip = Math.max(...chartData.map(d =>
+        (d.rainAmount || 0) + (d.snowAccumulation || 0) + (d.displayIce || 0)
+    ));
+    // Determine integer max height (at least 1, otherwise ceil of max value)
+    const yAxisMax = Math.max(1, Math.ceil(maxPrecip));
+
+    // Generate ticks at 0.5 intervals
+    const precipTicks = [];
+    for (let i = 0; i <= yAxisMax; i += 0.5) {
+        precipTicks.push(i);
     }
 
     return (
@@ -127,7 +140,11 @@ export function RiskCharts({ data }: RiskChartsProps) {
                                 tick={{ fontSize: 11, fill: textColor }}
                                 axisLine={false}
                                 tickLine={false}
-                                width={35}
+                                tickFormatter={(value) => value.toFixed(1)}
+                                type="number"
+                                domain={[0, yAxisMax]}
+                                ticks={precipTicks}
+                                width={45}
                             />
                             <YAxis
                                 yAxisId="right"
@@ -184,7 +201,7 @@ export function RiskCharts({ data }: RiskChartsProps) {
                             />
                             <Bar
                                 yAxisId="left"
-                                dataKey="precipAmount"
+                                dataKey="rainAmount"
                                 barSize={6}
                                 fill="url(#colorRain)"
                                 radius={[3, 3, 0, 0]}

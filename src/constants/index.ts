@@ -120,7 +120,7 @@ export const CHART_COLORS = {
 export const CHART_MARGINS = {
     top: 10,
     right: 0,
-    left: -20,
+    left: 0,
     bottom: 0,
 };
 

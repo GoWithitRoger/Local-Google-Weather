@@ -156,7 +156,7 @@ export function Header({
                         {hasData && (
                             <>
                                 <button
-                                    onClick={onExportCSV}
+                                    onClick={() => { console.log('CSV button clicked'); onExportCSV(); }}
                                     className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700"
                                     title="Download CSV"
                                     aria-label="Download CSV"
@@ -165,7 +165,7 @@ export function Header({
                                     <span className="hidden sm:inline">CSV</span>
                                 </button>
                                 <button
-                                    onClick={onExportJSON}
+                                    onClick={() => { console.log('JSON button clicked'); onExportJSON(); }}
                                     className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700"
                                     title="Download JSON"
                                     aria-label="Download JSON"

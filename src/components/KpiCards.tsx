@@ -74,12 +74,12 @@ export function KpiCards({ metrics, data }: KpiCardsProps) {
                 <div className="relative z-10">
                     <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
                         <Droplets size={14} className="text-blue-500" />
-                        Est. Max Ice
+                        Est. Max Ice Accretion
                     </h3>
                     <div className="mt-2 flex items-baseline gap-2">
                         {/* Primary Number: The higher of the two values */}
                         <span className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400">
-                            {Math.max(metrics.maxIce, metrics.provisionalMaxIce).toFixed(2)}
+                            {Math.max(metrics.totalIce, metrics.provisionalTotalIce).toFixed(2)}
                         </span>
                         <span className="text-sm text-slate-400 font-medium">in</span>
                     </div>
@@ -88,11 +88,11 @@ export function KpiCards({ metrics, data }: KpiCardsProps) {
                     <div className="mt-2 text-xs border-t border-slate-100 dark:border-slate-700 pt-2 space-y-0.5">
                         <div className="flex justify-between text-slate-500">
                             <span>Model Forecast:</span>
-                            <span className="font-mono">{metrics.maxIce.toFixed(2)}"</span>
+                            <span className="font-mono">{metrics.totalIce.toFixed(2)}"</span>
                         </div>
                         <div className="flex justify-between text-blue-600 dark:text-blue-400 font-medium">
                             <span>Potential Max:</span>
-                            <span className="font-mono">{metrics.provisionalMaxIce.toFixed(2)}"</span>
+                            <span className="font-mono">{metrics.provisionalTotalIce.toFixed(2)}"</span>
                         </div>
                     </div>
                 </div>
