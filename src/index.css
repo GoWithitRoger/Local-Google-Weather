@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+:root {
+  --color-bg-primary: #f8fafc;
+  --color-bg-secondary: #ffffff;
+  --color-text-primary: #1e293b;
+  --color-text-secondary: #64748b;
+  --color-border: #e2e8f0;
+}
+
+.dark {
+  --color-bg-primary: #0f172a;
+  --color-bg-secondary: #1e293b;
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-border: #334155;
+}
+
+body {
+  @apply bg-slate-50 text-slate-800 transition-colors duration-200;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.dark body {
+  @apply bg-slate-900 text-slate-100;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-slate-100;
+}
+
+.dark ::-webkit-scrollbar-track {
+  @apply bg-slate-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 rounded-full;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  @apply bg-slate-600;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-400;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-500;
+}
+
+/* Card hover effects */
+.card {
+  @apply bg-white rounded-xl shadow-sm border border-slate-200 transition-all duration-200;
+}
+
+.dark .card {
+  @apply bg-slate-800 border-slate-700;
+}
+
+.card:hover {
+  @apply shadow-md;
+}
+
+/* Risk level pulse animations */
+@keyframes risk-pulse-critical {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+  }
+}
+
+.risk-critical {
+  animation: risk-pulse-critical 2s infinite;
+}
+
+/* Chart tooltips */
+.recharts-tooltip-wrapper {
+  @apply !outline-none;
+}
+
+.recharts-default-tooltip {
+  @apply !bg-white !border-slate-200 !rounded-lg !shadow-lg;
+}
+
+.dark .recharts-default-tooltip {
+  @apply !bg-slate-800 !border-slate-700;
+}
+
+/* Table styles */
+.data-table th {
+  @apply sticky top-0 bg-slate-100 z-10;
+}
+
+.dark .data-table th {
+  @apply bg-slate-800;
+}
+
+/* Ensure the top-left corner (Time) stays on top of both row-headers and col-headers */
+.data-table th:first-child {
+  @apply z-30;
+}
+
+.data-table td:first-child {
+  @apply sticky left-0 bg-white z-20;
+}
+
+.dark .data-table td:first-child {
+  @apply bg-slate-800;
+}
+
+.data-table tr {
+  @apply border-b border-slate-100;
+}
+
+.dark .data-table tr {
+  @apply border-slate-700;
+}
+
+.data-table tr:hover {
+  @apply bg-slate-50;
+}
+
+.dark .data-table tr:hover {
+  @apply bg-slate-800/50;
+}
+
+/* Button focus states for accessibility */
+button:focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+.dark button:focus-visible {
+  @apply ring-offset-slate-900;
+}
+
+/* Loading skeleton animation */
+.skeleton {
+  @apply animate-pulse bg-slate-200 rounded;
+}
+
+.dark .skeleton {
+  @apply bg-slate-700;
+}
+
+/* Glassmorphism effect for header */
+.glass {
+  @apply backdrop-blur-md bg-slate-900/95;
+}
