@@ -97,7 +97,7 @@ export function processWeatherData(forecastHours: ForecastHour[]): ChartDataPoin
 
         let provisionalIce = 0;
         if (isLiquidSource && wetBulbTemp <= 32 && precipAmount > 0) {
-            provisionalIce = calculateProvisionalAccretion(precipAmount, wetBulbTemp, windSpeed);
+            provisionalIce = calculateProvisionalAccretion(precipAmount, wetBulbTemp, windSpeed, dewPoint);
         }
 
         return {

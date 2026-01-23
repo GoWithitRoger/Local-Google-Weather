@@ -19,7 +19,7 @@ export {
 } from './extraction';
 
 // Ice accretion calculations
-export { calculateProvisionalAccretion } from './ice-accretion';
+export { calculateProvisionalAccretion, calculatePreciseAccretion } from './ice-accretion';
 
 // Data processing
 export {
