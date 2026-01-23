@@ -96,10 +96,12 @@ export function Header({
                                 Ice Storm Monitor
                             </h1>
                             <div className="flex items-center gap-2 text-xs text-blue-200 flex-wrap mt-0.5">
-                                <span className="bg-blue-900/50 px-2 py-0.5 rounded-full border border-blue-700/50 flex items-center gap-1.5">
-                                    <MapPin size={10} />
-                                    {location.name}
-                                </span>
+                                {location.name && (
+                                    <span className="bg-blue-900/50 px-2 py-0.5 rounded-full border border-blue-700/50 flex items-center gap-1.5">
+                                        <MapPin size={10} />
+                                        {location.name}
+                                    </span>
+                                )}
                                 {hoursReturned > 0 && (
                                     <>
                                         <span className="text-blue-400">•</span>
@@ -245,9 +247,7 @@ export function Header({
                     </button>
 
                     {/* Coordinates Display */}
-                    <span className="text-xs text-slate-500 hidden md:block">
-                        {location.lat}, {location.lon}
-                    </span>
+
                 </div>
             </div>
         </header>

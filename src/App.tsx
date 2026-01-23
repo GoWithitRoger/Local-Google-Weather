@@ -81,7 +81,12 @@ export default function App() {
 
                     {/* Empty/Loading State */}
                     {!hasData && !error && (
-                        <EmptyState loading={loading} onLoadDemo={loadDemoData} />
+                        <EmptyState
+                            loading={loading}
+                            onLoadDemo={loadDemoData}
+                            onGeolocate={useCurrentLocation}
+                            isLocating={geolocating}
+                        />
                     )}
 
                     {/* Main Dashboard */}
