@@ -1,7 +1,7 @@
 import type { ChartDataPoint, ForecastHour, ForecastMetrics } from '@/types';
 import { getNumericValue, getStringValue } from './extraction';
 import { calculateRiskScore } from './risk';
-import { calculateProvisionalAccretion } from './ice-accretion';
+import { calculatePreciseAccretion } from './ice-accretion';
 
 // ============================================================================
 // DATA PROCESSING
@@ -96,8 +96,8 @@ export function processWeatherData(forecastHours: ForecastHour[]): ChartDataPoin
             typeUpper.includes('DRIZZLE');
 
         let provisionalIce = 0;
-        if (isLiquidSource && wetBulbTemp <= 32 && precipAmount > 0) {
-            provisionalIce = calculateProvisionalAccretion(precipAmount, wetBulbTemp, windSpeed, dewPoint);
+        if (isLiquidSource && temp <= 35 && precipAmount > 0) { // widened check to 35F to allow wet-bulb cooling
+            provisionalIce = calculatePreciseAccretion(temp, windSpeed, precipAmount, dewPoint);
         }
 
         return {

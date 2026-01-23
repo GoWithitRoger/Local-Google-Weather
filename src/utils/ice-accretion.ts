@@ -5,19 +5,12 @@
 
 /**
  * Calculates radial ice accretion using the Makkonen Heat Balance Model (ISO 12494).
- * This solves for the thermodynamic limit of freezing (Glaze vs Rime) by balancing
- * the heat released by freezing against the heat removed by convection and evaporation.
- * 
- * This replaces the simplified linear heuristic with a first-principles approach that:
- * - Handles "warm" rain with evaporative cooling (wet-bulb effects)
- * - Models wind as both increasing water flux AND cooling (finds balance point)
- * - Accounts for wire diameter sensitivity
- * 
- * @param tempF Air Temperature (°F)
+ * IMPORTANT: This signature matches processing.ts (Temp first).
+ * * @param tempF Air Temperature (°F) - CRITICAL: Must be Air Temp, not Wet Bulb
  * @param windSpeed Wind Speed (mph)
  * @param qpf Liquid Precipitation Rate (in/hr)
- * @param dewPointF Dew Point (°F) - Required for evaporative cooling calculation
- * @param diameterIn Diameter of the line/wire (inches). Standard distribution line ~0.5.
+ * @param dewPointF Dew Point (°F)
+ * @param diameterIn Diameter of the line/wire (inches). Default 0.5.
  * @returns Radial Ice Thickness Growth Rate (inches per hour)
  */
 export function calculatePreciseAccretion(
@@ -27,11 +20,12 @@ export function calculatePreciseAccretion(
     dewPointF: number,
     diameterIn: number = 0.5
 ): number {
-    // 1. Filter Warm Conditions (Physics cut-off)
-    // Accretion is impossible if Wet Bulb > 32, but we use precise heat balance below.
-    // Quick check: If air temp is well above freezing, return 0.
-    if (tempF > 33 && dewPointF > 32) return 0;
+    // 1. Safety Checks
     if (qpf <= 0) return 0;
+
+    // Physics Check: If air is properly warm (above 35F) and dewpoint is above freezing, no ice.
+    // We allow up to 35F because evaporative cooling can freeze water even if air is > 32F.
+    if (tempF > 35 && dewPointF > 32) return 0;
 
     // 2. Constants & Unit Conversions
     const PI = Math.PI;
@@ -39,7 +33,10 @@ export function calculatePreciseAccretion(
     const Td = (dewPointF - 32) * 5 / 9;  // Dew Point (C)
     const V = windSpeed * 0.44704;        // Wind (m/s)
     const D = diameterIn * 0.0254;        // Diameter (m)
-    const P_flux = qpf * 25.4 / 3600;     // Precip flux (kg/m2/s vertical approx)
+
+    // Precip Flux (Vertical)
+    // Convert in/hr -> mm/hr -> kg/m2/s
+    const P_flux = (qpf * 25.4) / 3600;   // kg/m2/s
 
     // Physical Constants
     const L_f = 334000;    // Latent Heat of Freezing (J/kg)
@@ -52,14 +49,15 @@ export function calculatePreciseAccretion(
 
     // 3. Aerodynamics (Water Flux Impingement)
     // Estimate Liquid Water Content (LWC) in kg/m3 from Precip Rate (Best 1950)
-    // LWC = 0.072 * P(mm/hr)^0.88 g/m3
+    // LWC (g/m3) = 0.072 * P(mm/hr)^0.88
     const P_mm_hr = qpf * 25.4;
-    const LWC_kg = (0.072 * Math.pow(P_mm_hr, 0.88)) / 1000;
+    const LWC_g_m3 = 0.072 * Math.pow(P_mm_hr, 0.88);
+    const LWC_kg = LWC_g_m3 / 1000;
 
     // Total Water Mass Flux (M_w) hitting the wire (kg/m/s)
     // Combines vertical falling rain + horizontal wind-blown rain
     const horizontal_flux = LWC_kg * V;     // kg/m2/s
-    const vertical_flux = P_flux * 1000;    // kg/m2/s (approx)
+    const vertical_flux = P_flux;           // kg/m2/s
     const J_imp = Math.sqrt(Math.pow(horizontal_flux, 2) + Math.pow(vertical_flux, 2)); // Total Flux kg/m2/s
     const M_w = D * J_imp; // Mass per meter of wire (kg/m/s)
 
@@ -67,17 +65,16 @@ export function calculatePreciseAccretion(
     // Calculate Reynolds & Nusselt Numbers for Heat Transfer Coeff (h)
     let Re = (rho_air * V * D) / mu_air;
     if (Re < 1) Re = 1;
-    // Nusselt correlation for cylinder in cross-flow
+    // Nusselt correlation for cylinder in cross-flow (McAdams)
     const Nu = 0.3 + (0.62 * Math.sqrt(Re) * Math.pow(0.71, 0.33)) /
         Math.pow(1 + Math.pow(0.4 / 0.71, 0.66), 0.25) * Math.pow(1 + Math.pow(Re / 282000, 0.625), 0.8);
     const h = (Nu * k_air) / D; // Convective Heat Transfer Coefficient (W/m2K)
 
     // Vapor Pressures for Evaporation (Pascals)
-    // Saturation vapor pressure at Surface (0C) vs Air (Td)
-    const es_0 = 611.2;
-    const e_a = 611.2 * Math.exp((17.67 * Td) / (Td + 243.5));
+    const es_0 = 611.2; // Saturation at 0C (Surface)
+    const e_a = 611.2 * Math.exp((17.67 * Td) / (Td + 243.5)); // Vapor pressure of air
 
-    // Heat Fluxes (W/m2) - Positive means removing heat (cooling)
+    // Heat Fluxes (W/m2)
     // Q_c: Convection (Cooling if Ta < 0)
     const q_c = h * (0 - Ta);
 
@@ -86,7 +83,7 @@ export function calculatePreciseAccretion(
     const q_e = h * 0.622 * (L_e / (1004 * 101325)) * (es_0 - e_a) * 1004 * rho_air;
 
     // Q_s: Sensible Heat of Rain (Warming if rain is warmer than 0C)
-    // Rain arrives at Ta, must cool to 0C. This ADDS heat to the surface (Negative cooling).
+    // Rain arrives at Ta, must cool to 0C.
     const q_s = J_imp * Cp_w * (0 - Ta);
 
     // Total Cooling Available to Freeze Water (W/m2)
@@ -103,9 +100,10 @@ export function calculatePreciseAccretion(
     alpha = Math.max(0, Math.min(alpha, 1.0));
 
     // 6. Calculate Radial Growth Rate
-    // Mass Rate Frozen = alpha * M_w
-    // Radial Growth dR/dt = MassRate / (rho_ice * PI * D) approx
+    // Mass Rate Frozen = alpha * M_w (kg/m/s)
     const mass_rate_frozen = alpha * M_w;
+
+    // Radial Growth dR/dt = MassRate / (rho_ice * PI * D) approx
     const dr_dt_m_s = mass_rate_frozen / (rho_ice * PI * D);
 
     // Convert to inches per hour
@@ -113,8 +111,7 @@ export function calculatePreciseAccretion(
 }
 
 /**
- * @deprecated Use calculatePreciseAccretion instead - this linear heuristic is physically inaccurate.
- * Kept for backward compatibility during transition.
+ * Legacy placeholder - Do not use.
  */
 export function calculateProvisionalAccretion(
     qpf: number,
@@ -122,18 +119,5 @@ export function calculateProvisionalAccretion(
     windSpeed: number,
     dewPoint?: number
 ): number {
-    // If dewPoint is provided, use the precise model
-    if (dewPoint !== undefined) {
-        return calculatePreciseAccretion(wetBulb, windSpeed, qpf, dewPoint);
-    }
-
-    // Legacy fallback (linear heuristic) - kept for backward compatibility
-    if (wetBulb > 32 || qpf <= 0) return 0;
-
-    let efficiency = 0.5;
-    efficiency += (32 - wetBulb) * 0.05;
-    efficiency += windSpeed * 0.02;
-    efficiency = Math.min(Math.max(efficiency, 0), 1.0);
-
-    return qpf * efficiency;
+    return 0; // Disabled to prevent fallback errors
 }
