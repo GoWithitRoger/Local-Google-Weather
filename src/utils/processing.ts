@@ -127,6 +127,7 @@ export function processWeatherData(forecastHours: ForecastHour[]): ChartDataPoin
             uvIndex,
             condition,
             riskScore,
+            thunderstormProbability: hour.thunderstormProbability ?? 0,
         };
     });
 }

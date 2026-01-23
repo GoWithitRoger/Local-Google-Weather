@@ -153,6 +153,7 @@ export interface ChartDataPoint {
 
     // Computed
     riskScore: number;
+    thunderstormProbability: number;
 }
 
 /**
