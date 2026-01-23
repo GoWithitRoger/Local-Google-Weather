@@ -120,12 +120,7 @@ export function useWeatherData(apiKey: string): UseWeatherDataReturn {
         downloadJSON(rawData, `weather-data-${location.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}-${new Date().toISOString().split('T')[0]}.json`);
     }, [rawData, location.name]);
 
-    // Auto-fetch on mount if API key is available
-    useEffect(() => {
-        if (apiKey) {
-            fetchWeather();
-        }
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
 
     // Re-fetch when location changes
     useEffect(() => {

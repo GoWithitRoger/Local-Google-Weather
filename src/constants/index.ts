@@ -98,9 +98,9 @@ export const WEATHER_API_URL = 'https://weather.googleapis.com/v1/forecast/hours
 // ============================================================================
 
 export const DEFAULT_LOCATION = {
-    lat: import.meta.env.VITE_DEFAULT_LAT || '40.7128',
-    lon: import.meta.env.VITE_DEFAULT_LON || '-74.0060',
-    name: import.meta.env.VITE_DEFAULT_LOCATION_NAME || 'New York, NY',
+    lat: '',
+    lon: '',
+    name: '',
 };
 
 // ============================================================================
