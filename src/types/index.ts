@@ -164,7 +164,15 @@ export interface ChartDataPoint {
     // Computed
     riskScore: number;
     thunderstormProbability: number;
+    /** Flash freeze risk level */
+    flashFreezeRisk: FlashFreezeRisk;
 }
+
+/**
+ * Risk labels for flash freeze detection
+ */
+export type FlashFreezeRisk = 'NONE' | 'HIGH: Flash Freeze' | 'SEVERE: Snow Covering Ice';
+
 
 /**
  * Computed metrics from forecast data
@@ -197,7 +205,7 @@ export interface ForecastMetrics {
     /** Total radial wire ice accretion (inches) */
     totalRadialWireIce: number;
     /** Flash freeze risk level: 'NONE', 'HIGH: Flash Freeze', or 'SEVERE: Snow Covering Ice' */
-    flashFreezeRisk: string;
+    flashFreezeRisk: FlashFreezeRisk;
 }
 
 /**

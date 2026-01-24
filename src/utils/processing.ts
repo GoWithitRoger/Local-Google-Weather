@@ -1,4 +1,4 @@
-import type { ChartDataPoint, ForecastHour } from '@/types';
+import type { ChartDataPoint, ForecastHour, FlashFreezeRisk } from '@/types';
 import { getNumericValue, getStringValue } from './extraction';
 import { calculateRiskScore } from './risk';
 import { calculatePreciseAccretion } from './ice-accretion';
@@ -21,6 +21,13 @@ export function processWeatherData(forecastHours: ForecastHour[]): ChartDataPoin
     // Initialize "buckets" for state tracking
     let currentRoadIceDepth = 0;
     let currentSnowDepth = 0;
+
+    // Flash Freeze State
+    // Initialize road temp with first hour's air temp to avoid start-up shock
+    let roadTemp = forecastHours.length > 0
+        ? getNumericValue(forecastHours[0].temperature, 'degrees')
+        : 32;
+    let standingWater = 0;
 
     const results: ChartDataPoint[] = [];
 
@@ -150,6 +157,34 @@ export function processWeatherData(forecastHours: ForecastHour[]): ChartDataPoin
         currentSnowDepth = Math.max(0, currentSnowDepth + newSnowDepth - snowMelt - compaction);
         const snowStatus = getSnowStatus(currentSnowDepth);
 
+        // ================================================================
+        // FLASH FREEZE RISK (Standing Water + Falling Temp)
+        // ================================================================
+        // 1. Update Road Temp (Simple Thermal Inertia Model)
+        // Road lags behind air temperature changes (30% catch-up per hour)
+        roadTemp += (temp - roadTemp) * 0.3;
+
+        // 2. Manage Water Bucket
+        if (temp > 32) {
+            // If it's warm, rain adds to standing water
+            standingWater += precipAmount;
+        }
+
+        // 3. Drainage / Evaporation (50% per hour)
+        standingWater *= 0.5;
+
+        // 4. Risk Detection
+        let flashFreezeRisk: FlashFreezeRisk = 'NONE';
+        // THRESHOLD: 0.01 inches of water is enough for a glaze
+        if (roadTemp <= 32 && standingWater > 0.01) {
+            const isSnowing = snowAccumulation > 0;
+            if (isSnowing) {
+                flashFreezeRisk = 'SEVERE: Snow Covering Ice';
+            } else {
+                flashFreezeRisk = 'HIGH: Flash Freeze';
+            }
+        }
+
         results.push({
             fullDate: date,
             timestamp: date.toISOString(),
@@ -183,6 +218,7 @@ export function processWeatherData(forecastHours: ForecastHour[]): ChartDataPoin
             condition,
             riskScore,
             thunderstormProbability: hour.thunderstormProbability ?? 0,
+            flashFreezeRisk,
         });
     }
 

@@ -58,6 +58,23 @@ export function RiskCharts({ data, metrics }: RiskChartsProps) {
     // Determine max height rounded up to nearest 0.5 (at least 1)
     const yAxisMax = Math.max(1, Math.ceil(maxPrecip * 2) / 2);
 
+    // Find snow covering ice intervals for highlighting
+    const severeRiskIntervals: { start: string, end: string }[] = [];
+    let currentSevereStart: string | null = null;
+
+    chartData.forEach((d, i) => {
+        const isSevere = d.flashFreezeRisk === 'SEVERE: Snow Covering Ice';
+        if (isSevere && !currentSevereStart) {
+            currentSevereStart = d.label;
+        } else if (!isSevere && currentSevereStart) {
+            severeRiskIntervals.push({ start: currentSevereStart, end: data[i - 1].label });
+            currentSevereStart = null;
+        }
+    });
+    if (currentSevereStart) {
+        severeRiskIntervals.push({ start: currentSevereStart, end: data[data.length - 1].label });
+    }
+
     // Generate ticks at 0.5 intervals
     const precipTicks = [];
     for (let i = 0; i <= yAxisMax; i += 0.5) {
@@ -136,6 +153,26 @@ export function RiskCharts({ data, metrics }: RiskChartsProps) {
                                     />
                                 ) : null
                             ))}
+
+                            {/* Severe Risk Highlights (Snow Covering Ice) */}
+                            {severeRiskIntervals.map((interval, index) => (
+                                <ReferenceArea
+                                    key={`severe-${index}`}
+                                    x1={interval.start}
+                                    x2={interval.end}
+                                    yAxisId="left"
+                                    fill="#b91c1c" // Red-700
+                                    fillOpacity={0.2}
+                                    label={{
+                                        value: "SNOW OVER ICE",
+                                        position: 'insideTop',
+                                        fill: '#b91c1c',
+                                        fontSize: 10,
+                                        fontWeight: 'bold'
+                                    }}
+                                />
+                            ))}
+
 
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
                             <XAxis

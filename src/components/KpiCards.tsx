@@ -1,4 +1,4 @@
-import { Zap, ShieldAlert, Droplets, Thermometer, Clock, Snowflake, CloudRain, AlertTriangle } from 'lucide-react';
+import { Zap, ShieldAlert, Droplets, Thermometer, Clock, Snowflake, CloudRain } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, LineChart, Line, YAxis } from 'recharts';
 import { getRiskColor, getRiskLabel, getRiskLevel, formatPrecipType } from '@/utils';
 import type { ForecastMetrics, ChartDataPoint } from '@/types';
@@ -16,37 +16,9 @@ export function KpiCards({ metrics, data }: KpiCardsProps) {
     const minTemp = Math.min(...data.map(d => d.temp)) - 5;
     const maxTemp = Math.max(...data.map(d => d.temp)) + 5;
 
-    // Flash Freeze Detection
-    const hasFlashFreezeRisk = metrics.flashFreezeRisk && metrics.flashFreezeRisk !== 'NONE';
-    const isSevereFreeze = metrics.flashFreezeRisk?.includes('SEVERE');
-
     return (
         <div className="space-y-4">
-            {/* Flash Freeze Warning Banner */}
-            {hasFlashFreezeRisk && (
-                <div className={`rounded-lg p-4 flex items-center gap-3 animate-pulse-slow ${isSevereFreeze
-                    ? 'bg-red-100 dark:bg-red-900/30 border-2 border-red-500'
-                    : 'bg-amber-100 dark:bg-amber-900/30 border-2 border-amber-500'
-                    }`}>
-                    <AlertTriangle
-                        size={32}
-                        className={isSevereFreeze ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'}
-                    />
-                    <div>
-                        <h3 className={`font-bold text-lg ${isSevereFreeze ? 'text-red-800 dark:text-red-200' : 'text-amber-800 dark:text-amber-200'
-                            }`}>
-                            {metrics.flashFreezeRisk}
-                        </h3>
-                        <p className={`text-sm ${isSevereFreeze ? 'text-red-700 dark:text-red-300' : 'text-amber-700 dark:text-amber-300'
-                            }`}>
-                            {isSevereFreeze
-                                ? 'Rain will freeze on roads before snow covers it — extremely dangerous hidden ice!'
-                                : 'Standing water from rain will freeze on road surfaces as temperatures drop.'
-                            }
-                        </p>
-                    </div>
-                </div>
-            )}
+
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
 

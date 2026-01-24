@@ -51,4 +51,4 @@ export {
 } from './export';
 
 // Road weather hazards
-export { detectFlashFreezeRisk } from './road-weather';
+

@@ -1,5 +1,5 @@
 import type { ChartDataPoint, ForecastMetrics } from '@/types';
-import { detectFlashFreezeRisk } from './road-weather';
+
 
 /**
  * Calculate aggregate metrics from chart data
@@ -94,6 +94,10 @@ export function calculateMetrics(chartData: ChartDataPoint[]): ForecastMetrics {
         roadClearTime,
         maxSnowDepth: peakSnowDepth,  // "Max Depth" -> peak from bucket model
         totalRadialWireIce,
-        flashFreezeRisk: detectFlashFreezeRisk(chartData),
+        flashFreezeRisk: chartData.some(d => d.flashFreezeRisk === 'SEVERE: Snow Covering Ice')
+            ? 'SEVERE: Snow Covering Ice'
+            : chartData.some(d => d.flashFreezeRisk === 'HIGH: Flash Freeze')
+                ? 'HIGH: Flash Freeze'
+                : 'NONE',
     };
 }
