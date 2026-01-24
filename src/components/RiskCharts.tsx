@@ -54,8 +54,8 @@ export function RiskCharts({ data }: RiskChartsProps) {
             d.wireIce || 0
         )
     ));
-    // Determine integer max height (at least 1, otherwise ceil of max value)
-    const yAxisMax = Math.max(1, Math.ceil(maxPrecip));
+    // Determine max height rounded up to nearest 0.5 (at least 1)
+    const yAxisMax = Math.max(1, Math.ceil(maxPrecip * 2) / 2);
 
     // Generate ticks at 0.5 intervals
     const precipTicks = [];
