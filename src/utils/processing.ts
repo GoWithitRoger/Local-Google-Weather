@@ -123,7 +123,21 @@ export function processWeatherData(forecastHours: ForecastHour[]): ChartDataPoin
         // ROAD ICE BUCKET MODEL
         // ================================================================
         // INPUT: New deposits from API ice thickness
-        const newRoadIceDeposit = iceThickness;
+        // FILTER: Ignore API ice thickness if it's strictly SNOW (Google API sometimes puts SWE here)
+        // Only accept ice thickness if it's explicitly freezing rain/ice or mixed, 
+        // OR if temp is near freezing. If it's pure snow, it adds to snowDepth, not roadIce.
+        // We check if "SNOW" is in the type but "RAIN" or "ICE" or "FREEZING" is NOT.
+        let newRoadIceDeposit = iceThickness;
+        const isPureSnow = typeUpper.includes('SNOW') &&
+            !typeUpper.includes('RAIN') &&
+            !typeUpper.includes('ICE') &&
+            !typeUpper.includes('FREEZING') &&
+            !typeUpper.includes('MIX') &&
+            !typeUpper.includes('SLEET');
+
+        if (isPureSnow || snowAccumulation > 0) {
+            newRoadIceDeposit = 0;
+        }
 
         // OUTPUT: Burnoff rate (only when not actively precipitating)
         let roadIceBurnoff = 0;

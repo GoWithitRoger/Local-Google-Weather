@@ -79,8 +79,10 @@ export function calculatePreciseAccretion(
     const q_c = h * (0 - Ta);
 
     // Q_e: Evaporation (Cooling if air is dry)
-    // Simplified mass transfer via Lewis relation
-    const q_e = h * 0.622 * (L_e / (1004 * 101325)) * (es_0 - e_a) * 1004 * rho_air;
+    // Formula: Q_e = (h / Cp_air) * L_e * 0.622 * (es_0 - e_a) / Pressure
+    const Cp_air = 1004; // Specific heat of air J/kgK
+    const pressure = 101325; // Standard atm (Pa)
+    const q_e = (h / Cp_air) * L_e * 0.622 * (es_0 - e_a) / pressure;
 
     // Q_s: Sensible Heat of Rain (Warming if rain is warmer than 0C)
     // Rain arrives at Ta, must cool to 0C.
