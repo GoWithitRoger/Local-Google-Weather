@@ -32,6 +32,21 @@ export const WIND_THRESHOLDS = {
 } as const;
 
 /**
+ * Wind Stress Multipliers for Radial Ice
+ * Wind load increases mechanically with ice diameter (Sail Effect)
+ */
+export const WIND_STRESS_MULTIPLIERS = {
+    /** < 15 mph: Static load dominant */
+    LOW: 1.0,
+    /** 15-29 mph: Moderate galloping risk */
+    MODERATE: 1.5,
+    /** 30-45 mph: High stress, likely breaking weak branches */
+    HIGH: 2.0,
+    /** > 45 mph: Critical stress, widespread line failure */
+    EXTREME: 3.0,
+} as const;
+
+/**
  * Risk score weights - contributes to 0-100 outage probability
  */
 export const RISK_WEIGHTS = {
@@ -73,6 +88,23 @@ export const RISK_LEVELS: Record<RiskLevel, { max: number; color: string; label:
         bgClass: 'bg-red-500',
     },
 };
+
+// ============================================================================
+// RADIAL ICE THRESHOLDS (NWS Standard for Wire Accretion)
+// ============================================================================
+
+/**
+ * Radial ice accretion thresholds for power line ice loading (inches)
+ * These are RADIAL (one side of wire), not diameter
+ */
+export const RADIAL_ICE_THRESHOLDS = {
+    /** Some sagging, usually no outages */
+    NUISANCE: 0.25,
+    /** NWS Ice Storm Warning criteria - limbs break, scattered outages */
+    SIGNIFICANT: 0.50,
+    /** Widespread breaking of poles and lines */
+    CATASTROPHIC: 0.75,
+} as const;
 
 // ============================================================================
 // API CONFIGURATION
@@ -141,9 +173,13 @@ export const CSV_COLUMNS = [
     { key: 'thunderstormProbability', label: 'Thunderstrom Prob (%)' },
     { key: 'precipAmount', label: 'Precip Amount (in)' },
     { key: 'precipType', label: 'Precip Type' },
-    { key: 'iceThickness', label: 'Ice Accretion (API) (in)' },
-    { key: 'provisionalIce', label: 'Max Potential Ice (Derived) (in)' },
-    { key: 'snowAccumulation', label: 'Snow (in)' },
+    { key: 'iceThickness', label: 'Road Ice - API Model (in)' },
+    { key: 'radialWireIce', label: 'Radial Wire Ice - Makkonen (in)' },
+    { key: 'roadIceDepth', label: 'Road Ice Depth - Tracked (in)' },
+    { key: 'roadStatus', label: 'Road Status' },
+    { key: 'snowAccumulation', label: 'New Snow (in)' },
+    { key: 'snowDepth', label: 'Snow Depth - Tracked (in)' },
+    { key: 'snowStatus', label: 'Snow Status' },
     { key: 'windSpeed', label: 'Wind Speed (mph)' },
     { key: 'windGust', label: 'Wind Gust (mph)' },
     { key: 'windDirection', label: 'Wind Dir (°)' },

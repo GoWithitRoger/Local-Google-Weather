@@ -112,12 +112,13 @@ export function calculatePreciseAccretion(
 
 /**
  * Legacy placeholder - Do not use.
+ * @deprecated Use calculatePreciseAccretion instead
  */
 export function calculateProvisionalAccretion(
-    qpf: number,
-    wetBulb: number,
-    windSpeed: number,
-    dewPoint?: number
+    _qpf: number,
+    _wetBulb: number,
+    _windSpeed: number,
+    _dewPoint?: number
 ): number {
     return 0; // Disabled to prevent fallback errors
 }
