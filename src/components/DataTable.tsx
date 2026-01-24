@@ -18,7 +18,9 @@ export function DataTable({ data }: DataTableProps) {
                         <th scope="col" className="px-3 py-3 font-semibold">Precip</th>
                         <th scope="col" className="px-3 py-3 font-semibold">Type</th>
                         <th scope="col" className="px-3 py-3 font-semibold">Ice</th>
+                        <th scope="col" className="px-3 py-3 font-semibold">Radial Ice</th>
                         <th scope="col" className="px-3 py-3 font-semibold">Snow</th>
+                        <th scope="col" className="px-3 py-3 font-semibold">Snow Depth</th>
                         <th scope="col" className="px-3 py-3 font-semibold">Wind</th>
                         <th scope="col" className="px-3 py-3 font-semibold">Gusts</th>
                         <th scope="col" className="px-3 py-3 font-semibold">Clouds</th>
@@ -71,9 +73,27 @@ export function DataTable({ data }: DataTableProps) {
                                 )}
                             </td>
                             <td className="px-3 py-2">
+                                {row.radialWireIce > 0 ? (
+                                    <span className="font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-1.5 py-0.5 rounded text-xs">
+                                        {formatIce(row.radialWireIce)}
+                                    </span>
+                                ) : (
+                                    <span className="text-slate-300 dark:text-slate-600">—</span>
+                                )}
+                            </td>
+                            <td className="px-3 py-2">
                                 {row.snowAccumulation > 0 ? (
                                     <span className="text-cyan-600 dark:text-cyan-400 text-sm">
                                         {row.snowAccumulation.toFixed(1)}"
+                                    </span>
+                                ) : (
+                                    <span className="text-slate-300 dark:text-slate-600">—</span>
+                                )}
+                            </td>
+                            <td className="px-3 py-2">
+                                {row.snowDepth > 0 ? (
+                                    <span className="text-teal-600 dark:text-teal-400 text-sm">
+                                        {row.snowDepth.toFixed(1)}"
                                     </span>
                                 ) : (
                                     <span className="text-slate-300 dark:text-slate-600">—</span>

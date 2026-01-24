@@ -22,10 +22,12 @@ export function RiskCharts({ data }: RiskChartsProps) {
     // Create a derived data array for the chart
     const chartData = data.map(d => ({
         ...d,
-        // Display whichever is higher: The API's forecast or our thermodynamic calculation
-        displayIce: Math.max(d.iceThickness, d.provisionalIce),
+        // Use road ice from API or tracked depth (whichever is higher)
+        displayIce: Math.max(d.iceThickness, d.roadIceDepth),
         // Fix for double counting: If type is SNOW, don't show precipAmount as Rain
-        rainAmount: (d.precipType === 'SNOW') ? 0 : d.precipAmount
+        rainAmount: (d.precipType === 'SNOW') ? 0 : d.precipAmount,
+        // Radial wire ice for the dashed line
+        wireIce: d.radialWireIce
     }));
 
     // Find distinct days for background shading
@@ -47,7 +49,10 @@ export function RiskCharts({ data }: RiskChartsProps) {
         days[days.length - 1].end = data[data.length - 1].label;
     }
     const maxPrecip = Math.max(...chartData.map(d =>
-        (d.rainAmount || 0) + (d.snowAccumulation || 0) + (d.displayIce || 0)
+        Math.max(
+            (d.rainAmount || 0) + (d.snowAccumulation || 0) + (d.displayIce || 0),
+            d.wireIce || 0
+        )
     ));
     // Determine integer max height (at least 1, otherwise ceil of max value)
     const yAxisMax = Math.max(1, Math.ceil(maxPrecip));
@@ -74,11 +79,15 @@ export function RiskCharts({ data }: RiskChartsProps) {
                         </div>
                         <div className="flex items-center gap-1.5">
                             <div className="w-3 h-3 bg-blue-500 rounded-sm" />
-                            Ice Accretion (in)
+                            Road Ice (in)
                         </div>
                         <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-3 bg-purple-500 rounded-sm" />
-                            Snowfall (in)
+                            <div className="w-8 h-0.5 bg-purple-500" style={{ borderTop: '2px dashed #a855f7' }} />
+                            Wire Ice (in)
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-3 h-3 bg-cyan-500 rounded-sm" />
+                            Snow (in)
                         </div>
                         <div className="flex items-center gap-1.5">
                             <div className="w-3 h-3 bg-emerald-500 rounded-sm" />
@@ -104,8 +113,8 @@ export function RiskCharts({ data }: RiskChartsProps) {
                                     <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.4} />
                                 </linearGradient>
                                 <linearGradient id="colorSnow" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#a855f7" stopOpacity={0.8} />
-                                    <stop offset="95%" stopColor="#a855f7" stopOpacity={0.4} />
+                                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.8} />
+                                    <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.4} />
                                 </linearGradient>
                                 <linearGradient id="colorRain" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
@@ -207,6 +216,17 @@ export function RiskCharts({ data }: RiskChartsProps) {
                                 radius={[3, 3, 0, 0]}
                                 name="Rain (in)"
                                 stackId="precip"
+                            />
+                            {/* Wire Ice as dashed line overlaid on bars */}
+                            <Line
+                                yAxisId="left"
+                                type="monotone"
+                                dataKey="wireIce"
+                                stroke="#a855f7"
+                                strokeWidth={2}
+                                strokeDasharray="4 2"
+                                dot={false}
+                                name="Wire Ice (in)"
                             />
                         </ComposedChart>
                     </ResponsiveContainer>

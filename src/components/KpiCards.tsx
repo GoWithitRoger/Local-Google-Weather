@@ -18,7 +18,7 @@ export function KpiCards({ metrics, data }: KpiCardsProps) {
 
     return (
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-            {/* CARD 1: POWER RISK - Standard Size (1 col) */}
+            {/* CARD 1: POWER RISK */}
             <div className={`card p-4 relative overflow-hidden group ${isCritical ? 'risk-critical' : ''}`}>
                 <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
                     <Zap size={80} className="text-slate-900 dark:text-white" />
@@ -62,37 +62,54 @@ export function KpiCards({ metrics, data }: KpiCardsProps) {
                 </div>
             </div>
 
-            {/* CARD 2: MAX ICE (with Provisional Max) */}
+            {/* CARD 2: ICE ACCRETION - Road vs Wire with Burnoff Sparkline */}
             <div className="card p-4 animate-fade-in relative overflow-hidden" style={{ animationDelay: '100ms' }}>
                 <div className="absolute inset-x-0 bottom-0 h-16 opacity-20 pointer-events-none">
+                    {/* Sparkline shows tracked road ice depth with burnoff */}
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={data}>
-                            <Area type="monotone" dataKey="iceThickness" stroke="#3b82f6" fill="#3b82f6" strokeWidth={2} />
+                            <Area type="monotone" dataKey="roadIceDepth" stroke="#3b82f6" fill="#3b82f6" strokeWidth={2} />
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>
                 <div className="relative z-10">
                     <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
                         <Droplets size={14} className="text-blue-500" />
-                        Est. Max Ice Accretion
+                        Ice Accretion
                     </h3>
-                    <div className="mt-2 flex items-baseline gap-2">
-                        {/* Primary Number: The higher of the two values */}
-                        <span className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400">
-                            {Math.max(metrics.totalIce, metrics.provisionalTotalIce).toFixed(2)}
-                        </span>
-                        <span className="text-sm text-slate-400 font-medium">in</span>
-                    </div>
 
-                    {/* Comparison Subtext */}
-                    <div className="mt-2 text-xs border-t border-slate-100 dark:border-slate-700 pt-2 space-y-0.5">
-                        <div className="flex justify-between text-slate-500">
-                            <span>Model Forecast:</span>
-                            <span className="font-mono">{metrics.totalIce.toFixed(2)}"</span>
+                    <div className="mt-2 text-xs space-y-2">
+                        {/* Road Ice (flat surface from API) */}
+                        <div className="border-b border-slate-100 dark:border-slate-700 pb-2">
+                            <div className="flex justify-between items-baseline">
+                                <span className="text-slate-500">Road Ice (Flat):</span>
+                                <span className="font-mono font-bold text-blue-600 dark:text-blue-400">
+                                    {metrics.totalIce.toFixed(2)}"
+                                </span>
+                            </div>
+                            <p className="text-[10px] text-slate-400 mt-0.5">API model • sparkline shows burnoff</p>
                         </div>
-                        <div className="flex justify-between text-blue-600 dark:text-blue-400 font-medium">
-                            <span>Potential Max:</span>
-                            <span className="font-mono">{metrics.provisionalTotalIce.toFixed(2)}"</span>
+
+                        {/* Radial Wire Accretion (Makkonen model) */}
+                        <div>
+                            <div className="flex justify-between items-baseline">
+                                <span className="text-slate-500">Radial Wire:</span>
+                                <span className="font-mono font-bold text-purple-600 dark:text-purple-400">
+                                    {metrics.totalRadialWireIce.toFixed(2)}"
+                                </span>
+                            </div>
+                            <p className={`text-[10px] mt-0.5 font-medium ${metrics.totalRadialWireIce >= 0.50
+                                    ? 'text-red-600 dark:text-red-400'
+                                    : metrics.totalRadialWireIce >= 0.25
+                                        ? 'text-amber-600 dark:text-amber-400'
+                                        : 'text-emerald-600 dark:text-emerald-400'
+                                }`}>
+                                {metrics.totalRadialWireIce >= 0.50
+                                    ? '⚠️ NWS Ice Storm Warning'
+                                    : metrics.totalRadialWireIce >= 0.25
+                                        ? '⚠️ Significant Risk'
+                                        : '✓ Low risk'}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -127,63 +144,44 @@ export function KpiCards({ metrics, data }: KpiCardsProps) {
                 </div>
             </div>
 
-            {/* CARD 4: SNOW */}
-            {metrics.snowAccumulation > 0 ? (
+            {/* CARD 4: SNOW - New Snow + Tracked Depth with Melt Sparkline */}
+            {metrics.snowAccumulation > 0 || metrics.maxSnowDepth > 0 ? (
                 <div className="card p-4 animate-fade-in relative overflow-hidden" style={{ animationDelay: '200ms' }}>
                     <div className="absolute inset-x-0 bottom-0 h-16 opacity-20 pointer-events-none">
-                        {/* Sparkline shows Accumulation Trend */}
+                        {/* Sparkline shows tracked snow depth with melt applied */}
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={data}>
-                                <Area type="monotone" dataKey="snowAccumulation" stroke="#06b6d4" fill="#06b6d4" strokeWidth={2} />
+                                <Area type="monotone" dataKey="snowDepth" stroke="#06b6d4" fill="#06b6d4" strokeWidth={2} />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
                     <div className="relative z-10">
                         <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
                             <Snowflake size={14} className="text-cyan-500" />
-                            Snow
+                            Snow Cover
                         </h3>
-                        <div className="mt-2 flex items-baseline gap-2">
-                            {/* Primary: Total Snowfall */}
-                            {/* Re-using snowAccumulation metric for now as 'Total' if we don't have a separate sum, but likely they differ.
-                                 If calculateMetrics only gives maxAccumulation, we might need a totalSnowfall metric. 
-                                 However, snowAccumulation usually IMPLIES max depth on ground? Or total fallen? 
-                                 Let's assume snowAccumulation IS the max depth. 
-                                 If the user wants 'Amounts', maybe they mean the sum of hourly snowfall. 
-                                 Standard practice: 'Snowfall' = sum of new snow. 'Accumulation' = depth on ground.
-                                 Our data has snowAccumulation field. Let's use it for both but distinguish Labels for now or assume they are similar.
-                                 Update: User asked for "snowfall amounts in addition to accumulation". 
-                                 I'll show two numbers if I can, but I only have `snowAccumulation` metric. 
-                                 I will calculate Total Snowfall on the fly here or assume a new metric is needed.
-                                 Let's calculate total 'new snow' from the passed `data` prop if possible? 
-                                 The `data` has `snowAccumulation` which is likely depth. 
-                                 The API has `precipitation.snowQpf`. 
-                                 If `snowAccumulation` is the *max* value, the *total* might be the sum of positive deltas? 
-                                 Let's just show the max accumulation and label it clearly, and maybe add a secondary "Max" label.
-                                 WAIT, user said: "snow tile should also integrate and convey the snowfall amounts in addition to accumulation... both... total... and spark line".
-                                 
-                                 Let's try to simulate 'Total' by summing up positive increases in accumulation (crude but works if no melt).
-                                 Or just show the Max Accumulation clearly. 
-                                 Actually, `metrics.snowAccumulation` IS the Max. 
-                                 Let's display it as "Max Depth". 
-                                 And maybe "Total" is the same? 
-                                 Let's just show the main large number as Max Accumulation for now as that's the risk factor.
-                                 And maybe a smaller number for "Total"? 
-                                 Actually, let's keep it simple: Show Max Accumulation (Risk) and maybe the current sparkline is fine.
-                                 I will update the label to be more descriptive.
-                             */}
-                            <span className="text-2xl sm:text-3xl font-bold text-cyan-600 dark:text-cyan-400">
-                                {metrics.snowAccumulation.toFixed(1)}
-                            </span>
-                            <span className="text-sm text-slate-400 font-medium">in</span>
+
+                        <div className="mt-2 text-xs space-y-1.5">
+                            <div className="flex justify-between items-baseline">
+                                <span className="text-slate-500">New Snow:</span>
+                                <span className="font-mono font-bold text-cyan-600 dark:text-cyan-400">
+                                    {metrics.snowAccumulation.toFixed(1)}"
+                                </span>
+                            </div>
+                            <div className="flex justify-between items-baseline border-t border-slate-100 dark:border-slate-700 pt-1.5">
+                                <span className="text-slate-500">Max Depth:</span>
+                                <span className="font-mono font-bold text-cyan-700 dark:text-cyan-300 text-lg">
+                                    {metrics.maxSnowDepth.toFixed(1)}"
+                                </span>
+                            </div>
                         </div>
-                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                            Max Accumulation
+                        <p className="text-[10px] text-slate-400 mt-1">
+                            Sparkline tracks melt + compaction
                         </p>
                     </div>
                 </div>
             ) : (
-                /* CARD 4 ALT: TEMP RANGE (Fallback) */
+                /* CARD 4 ALT: TEMP RANGE (Fallback when no snow) */
                 <div className="card p-4 animate-fade-in relative overflow-hidden" style={{ animationDelay: '200ms' }}>
                     <div className="absolute inset-x-0 bottom-0 h-16 opacity-20 pointer-events-none">
                         <ResponsiveContainer width="100%" height="100%">
