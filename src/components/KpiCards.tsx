@@ -20,7 +20,7 @@ export function KpiCards({ metrics, data }: KpiCardsProps) {
         <div className="space-y-4">
 
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
                 {/* CARD 1: POWER RISK */}
                 <div className={`card p-4 relative overflow-hidden group ${isCritical ? 'risk-critical' : ''}`}>

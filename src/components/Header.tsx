@@ -105,7 +105,8 @@ export function Header({
                                 {hoursReturned > 0 && (
                                     <>
                                         <span className="text-blue-400">•</span>
-                                        <span className="text-blue-300">{daysInForecast}-Day / {hoursReturned}h Forecast</span>
+                                        <span className="text-blue-300 hidden sm:inline">{daysInForecast}-Day / {hoursReturned}h Forecast</span>
+                                        <span className="text-blue-300 sm:hidden">{daysInForecast}d / {hoursReturned}h</span>
                                     </>
                                 )}
                                 {metrics.dateRange && (
@@ -133,76 +134,81 @@ export function Header({
 
                     {/* Main Controls */}
                     <div className="flex flex-wrap items-center gap-2">
-                        {/* Last Fetch Time */}
+                        {/* Last Fetch Time - hidden on mobile */}
                         {lastFetchTime && !isDemoData && (
-                            <span className="text-xs text-slate-400 hidden sm:block">
+                            <span className="text-xs text-slate-400 hidden lg:block mr-2">
                                 Updated {formatLastFetch(lastFetchTime)}
                             </span>
                         )}
 
-                        {/* API Key Input */}
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Lock size={14} className="text-slate-500" />
+                        {/* Controls Group */}
+                        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end mt-2 sm:mt-0">
+                            {/* API Key Input - compacted on mobile */}
+                            <div className="relative flex-1 sm:flex-none">
+                                <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                                    <Lock size={13} className="text-slate-500" />
+                                </div>
+                                <input
+                                    type="password"
+                                    placeholder="API Key"
+                                    value={apiKey}
+                                    onChange={(e) => setApiKey(e.target.value)}
+                                    className="w-full sm:w-32 bg-slate-800/80 border border-slate-700 text-xs sm:text-sm text-white rounded-lg pl-8 pr-2 py-1.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-500"
+                                />
                             </div>
-                            <input
-                                type="password"
-                                placeholder="API Key"
-                                value={apiKey}
-                                onChange={(e) => setApiKey(e.target.value)}
-                                className="bg-slate-800/80 border border-slate-700 text-sm text-white rounded-lg pl-9 pr-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-32 transition-all placeholder:text-slate-500"
-                            />
+
+                            <div className="flex items-center gap-1.5">
+                                {/* CSV Export Button */}
+                                {hasData && (
+                                    <>
+                                        <button
+                                            onClick={() => { console.log('CSV button clicked'); onExportCSV(); }}
+                                            className="flex items-center justify-center w-8 h-8 sm:w-auto sm:h-auto sm:gap-1.5 sm:px-3 sm:py-1.5 rounded-lg text-sm font-medium bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700"
+                                            title="Download CSV"
+                                            aria-label="Download CSV"
+                                        >
+                                            <Download size={14} />
+                                            <span className="hidden sm:inline">CSV</span>
+                                        </button>
+                                        <button
+                                            onClick={() => { console.log('JSON button clicked'); onExportJSON(); }}
+                                            className="flex items-center justify-center w-8 h-8 sm:w-auto sm:h-auto sm:gap-1.5 sm:px-3 sm:py-1.5 rounded-lg text-sm font-medium bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700"
+                                            title="Download JSON"
+                                            aria-label="Download JSON"
+                                        >
+                                            <FileJson size={14} />
+                                            <span className="hidden sm:inline">JSON</span>
+                                        </button>
+                                    </>
+                                )}
+
+                                {/* Theme Toggle */}
+                                <button
+                                    onClick={cycleTheme}
+                                    className="flex items-center justify-center w-8 h-8 sm:w-auto sm:h-auto sm:gap-1.5 sm:px-3 sm:py-1.5 rounded-lg text-sm font-medium bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700"
+                                    title={`Theme: ${theme}`}
+                                    aria-label={`Switch to ${theme === 'dark' ? 'system' : theme === 'light' ? 'dark' : 'light'} theme`}
+                                >
+                                    <ThemeIcon size={14} />
+                                </button>
+
+                                {/* Refresh Button */}
+                                <button
+                                    onClick={() => onRefresh(true)}
+                                    disabled={loading}
+                                    className={`flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all
+                                        ${loading
+                                            ? 'bg-slate-700 text-slate-400 cursor-wait'
+                                            : 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white shadow-lg shadow-blue-500/25'
+                                        }`}
+                                    title={isCached ? 'Force refresh from API' : 'Refresh forecast'}
+                                    aria-label="Refresh forecast"
+                                >
+                                    <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                                    <span className={loading ? 'hidden sm:inline' : ''}>{loading ? 'Loading...' : 'Refresh'}</span>
+                                </button>
+                            </div>
                         </div>
-
-                        {/* CSV Export Button */}
-                        {hasData && (
-                            <>
-                                <button
-                                    onClick={() => { console.log('CSV button clicked'); onExportCSV(); }}
-                                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700"
-                                    title="Download CSV"
-                                    aria-label="Download CSV"
-                                >
-                                    <Download size={14} />
-                                    <span className="hidden sm:inline">CSV</span>
-                                </button>
-                                <button
-                                    onClick={() => { console.log('JSON button clicked'); onExportJSON(); }}
-                                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700"
-                                    title="Download JSON"
-                                    aria-label="Download JSON"
-                                >
-                                    <FileJson size={14} />
-                                    <span className="hidden sm:inline">JSON</span>
-                                </button>
-                            </>
-                        )}
-
-                        {/* Theme Toggle */}
-                        <button
-                            onClick={cycleTheme}
-                            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700"
-                            title={`Theme: ${theme}`}
-                            aria-label={`Switch to ${theme === 'dark' ? 'system' : theme === 'light' ? 'dark' : 'light'} theme`}
-                        >
-                            <ThemeIcon size={14} />
-                        </button>
-
-                        {/* Refresh Button */}
-                        <button
-                            onClick={() => onRefresh(true)}
-                            disabled={loading}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all
-                                ${loading
-                                    ? 'bg-slate-700 text-slate-400 cursor-wait'
-                                    : 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white shadow-lg shadow-blue-500/25'
-                                }`}
-                            title={isCached ? 'Force refresh from API' : 'Refresh forecast'}
-                            aria-label="Refresh forecast"
-                        >
-                            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-                            {loading ? 'Loading...' : 'Refresh'}
-                        </button>
                     </div>
                 </div>
 
