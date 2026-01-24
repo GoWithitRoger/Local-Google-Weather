@@ -192,7 +192,7 @@ export default function App() {
                                         aria-labelledby={`tab-${activeTab}`}
                                     >
                                         {activeTab === 'dashboard' ? (
-                                            <RiskCharts data={displayedData} />
+                                            <RiskCharts data={displayedData} metrics={displayedMetrics} />
                                         ) : (
                                             <DataTable data={displayedData} />
                                         )}

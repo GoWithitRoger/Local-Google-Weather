@@ -48,7 +48,7 @@ export function KpiCards({ metrics, data }: KpiCardsProps) {
                 </div>
             )}
 
-            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
 
                 {/* CARD 1: POWER RISK */}
                 <div className={`card p-4 relative overflow-hidden group ${isCritical ? 'risk-critical' : ''}`}>
@@ -244,37 +244,7 @@ export function KpiCards({ metrics, data }: KpiCardsProps) {
                     </div>
                 )}
 
-                {/* CARD 5: LOW / HIGH TEMP */}
-                <div className="card p-4 animate-fade-in relative overflow-hidden" style={{ animationDelay: '250ms' }}>
-                    <div className="absolute inset-x-0 bottom-0 h-16 opacity-20 pointer-events-none">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={data}>
-                                <Line type="monotone" dataKey="temp" stroke="#6366f1" strokeWidth={2} dot={false} />
-                                <YAxis domain={[minTemp, maxTemp]} hide />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </div>
-                    <div className="relative z-10">
-                        <div className="flex justify-between items-start mb-1">
-                            <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                                <Thermometer size={14} className="text-indigo-500" />
-                                Low / High
-                            </h3>
-                            <span className="text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap ml-2">
-                                Through {metrics.endDate}
-                            </span>
-                        </div>
-                        <div className="mt-2">
-                            <span className={`text-2xl sm:text-3xl font-bold ${metrics.minTemp <= 32 ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-300'}`}>
-                                {metrics.minTemp.toFixed(0)}°
-                            </span>
-                            <span className="text-slate-400 mx-1">/</span>
-                            <span className="text-xl font-bold text-slate-600 dark:text-slate-300">
-                                {metrics.maxTemp.toFixed(0)}°
-                            </span>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </div>
     );

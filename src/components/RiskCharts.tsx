@@ -5,14 +5,15 @@ import {
 import { ShieldAlert, Wind } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
 import { CHART_MARGINS } from '@/constants';
-import type { ChartDataPoint } from '@/types';
+import type { ChartDataPoint, ForecastMetrics } from '@/types';
 
 
 interface RiskChartsProps {
     data: ChartDataPoint[];
+    metrics: ForecastMetrics;
 }
 
-export function RiskCharts({ data }: RiskChartsProps) {
+export function RiskCharts({ data, metrics }: RiskChartsProps) {
     const { resolvedTheme } = useTheme();
     const isDark = resolvedTheme === 'dark';
 
@@ -235,9 +236,25 @@ export function RiskCharts({ data }: RiskChartsProps) {
 
             {/* CHART: Wind & Temp */}
             <div className="h-44 shrink-0 border-t border-slate-100 dark:border-slate-700 pt-4">
-                <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                    <Wind size={14} />
-                    Temperature & Wind Gusts
+                <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2">
+                        <Wind size={14} />
+                        Temperature & Wind Gusts
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-baseline gap-1 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded">
+                            <span className="text-[10px] text-slate-400 dark:text-slate-500">Low</span>
+                            <span className={`text-sm font-bold ${metrics.minTemp <= 32 ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-300'}`}>
+                                {metrics.minTemp.toFixed(0)}°
+                            </span>
+                        </div>
+                        <div className="flex items-baseline gap-1 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded">
+                            <span className="text-[10px] text-slate-400 dark:text-slate-500">High</span>
+                            <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                                {metrics.maxTemp.toFixed(0)}°
+                            </span>
+                        </div>
+                    </div>
                 </h4>
                 <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={data} margin={CHART_MARGINS}>
