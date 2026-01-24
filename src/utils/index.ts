@@ -24,8 +24,12 @@ export { calculateProvisionalAccretion, calculatePreciseAccretion } from './ice-
 // Data processing
 export {
     processWeatherData,
-    calculateMetrics,
 } from './processing';
+
+// Aggregate metrics
+export {
+    calculateMetrics,
+} from './metrics';
 
 // Alert generation
 export { generateAlerts } from './alerts';
