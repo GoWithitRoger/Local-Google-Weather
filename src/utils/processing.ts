@@ -2,6 +2,8 @@ import type { ChartDataPoint, ForecastHour, ForecastMetrics } from '@/types';
 import { getNumericValue, getStringValue } from './extraction';
 import { calculateRiskScore } from './risk';
 import { calculatePreciseAccretion } from './ice-accretion';
+import { calculateStreetIceBurnoff, getRoadIceStatus } from './street-ice';
+import { calculateSnowMeltRate, getSnowStatus, calculateSnowCompaction } from './snow-melt';
 
 // ============================================================================
 // DATA PROCESSING
@@ -9,39 +11,46 @@ import { calculatePreciseAccretion } from './ice-accretion';
 // ============================================================================
 
 /**
- * Process raw API data into chart-ready format
+ * Process raw API data into chart-ready format.
+ * Uses "bucket model" to track road ice and snow depth over time,
+ * applying accumulation and burnoff/melt physics.
  * @param forecastHours Array of raw forecast hours from API
  * @returns Processed chart data points
  */
 export function processWeatherData(forecastHours: ForecastHour[]): ChartDataPoint[] {
-    return forecastHours.map(hour => {
+    // Initialize "buckets" for state tracking
+    let currentRoadIceDepth = 0;
+    let currentSnowDepth = 0;
+
+    const results: ChartDataPoint[] = [];
+
+    for (const hour of forecastHours) {
         const dateStr = hour.interval?.startTime || hour.forecastTime || new Date().toISOString();
         const date = new Date(dateStr);
         const day = date.toLocaleDateString('en-US', { weekday: 'short' });
         const fullDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         const time = date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
+        const hourOfDay = date.getHours();
+        const isDaytime = hourOfDay >= 7 && hourOfDay < 19;
 
         // Temperature
         const temp = getNumericValue(hour.temperature, 'degrees');
-        // Fix: API uses feelsLikeTemperature, not apparentTemperature
         const feelsLike = getNumericValue(hour.feelsLikeTemperature, 'degrees') ||
             getNumericValue(hour.apparentTemperature, 'degrees', temp);
         const dewPoint = getNumericValue(hour.dewPoint, 'degrees');
         const wetBulbTemp = getNumericValue(hour.wetBulbTemperature, 'degrees', temp);
 
-        // Precipitation - Fix: probability is nested object with { type, percent }
+        // Precipitation
         const precipProb = getNumericValue(hour.precipitation?.probability, 'percent');
         const precipAmount = getNumericValue(hour.precipitation?.qpf, 'quantity');
-        // Fix: type is in probability object, not directly on precipitation
         const precipType = getStringValue(hour.precipitation?.probability, 'type') ||
             getStringValue(hour.precipitation, 'type', 'NONE');
 
-        // Ice and Snow
+        // Ice and Snow from API
         const iceThickness = getNumericValue(hour.iceThickness, 'thickness');
         const snowAccumulation = getNumericValue(hour.precipitation?.snowQpf, 'quantity');
 
-        // Wind (Fix: Access 'value' inside the nested speed/gust objects)
-        // The API returns { speed: { value: 9 }, gust: { value: 16 } }
+        // Wind
         const windRaw = hour.wind as any;
         const windSpeed = getNumericValue(windRaw?.speed, 'value') || getNumericValue(hour.wind, 'speed');
         const windGust = getNumericValue(windRaw?.gust, 'value') || getNumericValue(hour.wind, 'gust');
@@ -52,32 +61,28 @@ export function processWeatherData(forecastHours: ForecastHour[]): ChartDataPoin
         const cloudCover = hour.cloudCover ?? 0;
         const visibility = getNumericValue(hour.visibility, 'distance');
 
-        // Pressure (Fix: Map 'airPressure.meanSeaLevelMillibars' to pressure)
+        // Pressure
         const pressureRaw = (hour as any).airPressure ?? hour.pressure;
         const pressure = getNumericValue(pressureRaw, 'meanSeaLevelMillibars') || getNumericValue(pressureRaw, 'value');
 
-        // Conditions
+        // UV Index
         const uvRaw = hour.uvIndex;
         const uvIndex = typeof uvRaw === 'object'
             ? getNumericValue(uvRaw, 'value')
             : (uvRaw as number) ?? 0;
 
-        // Condition Text - Fix: Prioritize description.text path
+        // Condition Text
         let condition = '';
         const wc = hour.weatherCondition as any;
-
         if (typeof wc === 'string') {
             condition = wc;
         } else if (wc && typeof wc === 'object') {
-            // Priority 1: description.text is the correct API path
             if (wc.description && typeof wc.description === 'object' && wc.description.text) {
                 condition = wc.description.text;
             } else if (typeof wc.description === 'string') {
                 condition = wc.description;
-                // Priority 2: type field as fallback (e.g., "CLOUDY", "LIGHT_RAIN")
             } else if (wc.type && typeof wc.type === 'string') {
                 condition = wc.type.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase());
-                // Priority 3: value property as last resort
             } else if (wc.value && typeof wc.value === 'string') {
                 condition = wc.value;
             } else {
@@ -85,22 +90,67 @@ export function processWeatherData(forecastHours: ForecastHour[]): ChartDataPoin
             }
         }
 
-        // Computed risk
-        const riskScore = calculateRiskScore(iceThickness, windGust);
-
-        // Robust check for any liquid presence (Fixes the RAIN_AND_SNOW bug)
+        // Precipitation type analysis
         const typeUpper = precipType.toUpperCase();
         const isLiquidSource = typeUpper.includes('RAIN') ||
             typeUpper.includes('MIX') ||
             typeUpper.includes('SLEET') ||
             typeUpper.includes('DRIZZLE');
 
-        let provisionalIce = 0;
-        if (isLiquidSource && temp <= 35 && precipAmount > 0) { // widened check to 35F to allow wet-bulb cooling
-            provisionalIce = calculatePreciseAccretion(temp, windSpeed, precipAmount, dewPoint);
+        // ================================================================
+        // RADIAL WIRE ICE - Hourly Rate (Makkonen model)
+        // ================================================================
+        let radialWireIce = 0;
+        if (isLiquidSource && temp <= 35 && precipAmount > 0) {
+            radialWireIce = calculatePreciseAccretion(temp, windSpeed, precipAmount, dewPoint);
+        }
+        const provisionalIce = radialWireIce; // Alias for backwards compatibility
+
+        // Computed risk (uses THIS HOUR's radial ice rate)
+        const riskScore = calculateRiskScore(radialWireIce, windGust);
+
+        // ================================================================
+        // ROAD ICE BUCKET MODEL
+        // ================================================================
+        // INPUT: New deposits from API ice thickness
+        const newRoadIceDeposit = iceThickness;
+
+        // OUTPUT: Burnoff rate (only when not actively precipitating)
+        let roadIceBurnoff = 0;
+        if (newRoadIceDeposit === 0 && currentRoadIceDepth > 0) {
+            roadIceBurnoff = calculateStreetIceBurnoff(
+                temp, dewPoint, windSpeed, cloudCover, uvIndex, isDaytime
+            );
         }
 
-        return {
+        // Update bucket: add deposit, subtract burnoff, clamp at 0
+        currentRoadIceDepth = Math.max(0, currentRoadIceDepth + newRoadIceDeposit - roadIceBurnoff);
+        const roadStatus = getRoadIceStatus(currentRoadIceDepth);
+
+        // ================================================================
+        // SNOW DEPTH BUCKET MODEL
+        // ================================================================
+        // INPUT: New snow accumulation (API snowQpf already in inches of snow)
+        const newSnowDepth = snowAccumulation;
+
+        // OUTPUT: Melt rate (only when not actively snowing)
+        let snowMelt = 0;
+        if (newSnowDepth === 0 && currentSnowDepth > 0) {
+            // Pass rain amount only if it's liquid rain (not frozen)
+            const liquidRain = (isLiquidSource && temp > 32) ? precipAmount : 0;
+            snowMelt = calculateSnowMeltRate(
+                temp, dewPoint, windSpeed, liquidRain, cloudCover, uvIndex, isDaytime
+            );
+        }
+
+        // Compaction (snow settles ~1% per hour even without melting)
+        const compaction = calculateSnowCompaction(currentSnowDepth);
+
+        // Update bucket: add snow, subtract melt and compaction, clamp at 0
+        currentSnowDepth = Math.max(0, currentSnowDepth + newSnowDepth - snowMelt - compaction);
+        const snowStatus = getSnowStatus(currentSnowDepth);
+
+        results.push({
             fullDate: date,
             timestamp: date.toISOString(),
             label: `${day} ${time}`,
@@ -117,6 +167,11 @@ export function processWeatherData(forecastHours: ForecastHour[]): ChartDataPoin
             iceThickness,
             provisionalIce,
             snowAccumulation,
+            radialWireIce,
+            roadIceDepth: currentRoadIceDepth,
+            roadStatus,
+            snowDepth: currentSnowDepth,
+            snowStatus,
             windSpeed,
             windGust,
             windDirection,
@@ -128,9 +183,12 @@ export function processWeatherData(forecastHours: ForecastHour[]): ChartDataPoin
             condition,
             riskScore,
             thunderstormProbability: hour.thunderstormProbability ?? 0,
-        };
-    });
+        });
+    }
+
+    return results;
 }
+
 
 /**
  * Calculate aggregate metrics from chart data
@@ -154,6 +212,10 @@ export function calculateMetrics(chartData: ChartDataPoint[]): ForecastMetrics {
             snowAccumulation: 0,
             hoursWithPrecip: 0,
             precipTypes: [],
+            maxRoadIce: 0,
+            roadClearTime: null,
+            maxSnowDepth: 0,
+            totalRadialWireIce: 0,
         };
     }
 
@@ -164,9 +226,33 @@ export function calculateMetrics(chartData: ChartDataPoint[]): ForecastMetrics {
 
     const maxRiskIndex = riskScores.indexOf(Math.max(...riskScores));
 
-    // Calculate provisional ice accretion using thermodynamic efficiency model
-    // Now pre-calculated in processWeatherData
-    const totalProvisionalIce = chartData.reduce((sum, d) => sum + d.provisionalIce, 0);
+    // Total radial wire ice accretion (sum of hourly rates)
+    // d.provisionalIce stores the hourly accretion rate
+    const totalRadialWireIce = chartData.reduce((sum, d) => sum + d.provisionalIce, 0);
+
+    // For backwards compatibility, provisionalTotalIce = totalRadialWireIce
+    const totalProvisionalIce = totalRadialWireIce;
+
+    // Road ice metrics
+    const maxRoadIce = Math.max(...chartData.map(d => d.roadIceDepth));
+
+    // Find road clear time - first hour where road ice returns to 0 after being > 0
+    let roadClearTime: string | null = null;
+    let sawIce = false;
+    for (const d of chartData) {
+        if (d.roadIceDepth > 0.01) {
+            sawIce = true;
+        } else if (sawIce && d.roadIceDepth < 0.01) {
+            roadClearTime = d.timestamp;
+            break;
+        }
+    }
+
+    // FIX 1: "New Snow" = TOTAL SUM of hourly accumulation
+    const totalSnowAccumulation = chartData.reduce((sum, d) => sum + d.snowAccumulation, 0);
+
+    // FIX 2: "Max Depth" = PEAK of the bucket model (accounts for melt/compaction)
+    const peakSnowDepth = Math.max(...chartData.map(d => d.snowDepth));
 
     // Gather all precipitation types observed (excluding NONE)
     const precipTypesSet = new Set<string>();
@@ -188,8 +274,14 @@ export function calculateMetrics(chartData: ChartDataPoint[]): ForecastMetrics {
         peakRiskTime: chartData[maxRiskIndex]?.label || '',
         endDate: chartData[chartData.length - 1].fullDayLabel,
         totalPrecip: chartData.reduce((sum, d) => sum + d.precipAmount, 0),
-        snowAccumulation: Math.max(...chartData.map(d => d.snowAccumulation)),
+        // "New Snow" label -> total accumulation over forecast period
+        snowAccumulation: totalSnowAccumulation,
         hoursWithPrecip: chartData.filter(d => d.precipProb > 30).length,
         precipTypes: Array.from(precipTypesSet),
+        maxRoadIce,
+        roadClearTime,
+        maxSnowDepth: peakSnowDepth,  // "Max Depth" -> peak from bucket model
+        totalRadialWireIce,
     };
 }
+

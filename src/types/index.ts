@@ -135,6 +135,16 @@ export interface ChartDataPoint {
     iceThickness: number;
     provisionalIce: number;
     snowAccumulation: number;
+    /** Radial ice on wires (inches) - NWS standard for Ice Storm Warnings */
+    radialWireIce: number;
+    /** Road surface ice depth (inches) - tracks accumulation vs burnoff */
+    roadIceDepth: number;
+    /** Road status: 'Clear' | 'Icy (X.XX")' */
+    roadStatus: string;
+    /** Tracked snow depth (inches) - accumulates and melts */
+    snowDepth: number;
+    /** Snow status: 'Clear' | 'Snow Cover (X.X")' */
+    snowStatus: string;
 
     // Wind
     windSpeed: number;
@@ -176,6 +186,16 @@ export interface ForecastMetrics {
     snowAccumulation: number; // Max snow (inches)
     hoursWithPrecip: number;  // Hours with any precipitation
     precipTypes: string[];    // Types observed (RAIN, SNOW, etc.)
+
+    // Road/snow state tracking
+    /** Maximum road ice depth during forecast (inches) */
+    maxRoadIce: number;
+    /** Estimated time when roads will be clear (ISO string or null) */
+    roadClearTime: string | null;
+    /** Maximum tracked snow depth (inches) */
+    maxSnowDepth: number;
+    /** Total radial wire ice accretion (inches) */
+    totalRadialWireIce: number;
 }
 
 /**
