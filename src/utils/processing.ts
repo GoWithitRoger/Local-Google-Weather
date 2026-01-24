@@ -123,10 +123,12 @@ export function processWeatherData(forecastHours: ForecastHour[]): ChartDataPoin
         // ROAD ICE BUCKET MODEL
         // ================================================================
         // INPUT: New deposits from API ice thickness
-        // FILTER: Ignore API ice thickness if it's strictly SNOW (Google API sometimes puts SWE here)
-        // Only accept ice thickness if it's explicitly freezing rain/ice or mixed, 
-        // OR if temp is near freezing. If it's pure snow, it adds to snowDepth, not roadIce.
-        // We check if "SNOW" is in the type but "RAIN" or "ICE" or "FREEZING" is NOT.
+        // FILTER: Conservation of Mass Check
+        // The Google API often reports the total precipitation potential in multiple fields simultaneously.
+        // For example, 0.1" of Liquid Equivalent (QPF) might be reported as BOTH 1.0" of Snow AND 0.1" of Ice
+        // in the same hour when the condition is "SNOW". This is physically impossible (double counting the water).
+        // Since the condition is explicitly "SNOW" (and not "MIX" or "FREEZING RAIN"), we prioritize the Snow QPF
+        // and discard the Ice Thickness artifact to prevent false "Ice Storm" alerts during normal snow events.
         let newRoadIceDeposit = iceThickness;
         const isPureSnow = typeUpper.includes('SNOW') &&
             !typeUpper.includes('RAIN') &&
