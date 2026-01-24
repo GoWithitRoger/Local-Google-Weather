@@ -82,40 +82,39 @@ export function Header({
     const daysInForecast = Math.ceil(hoursReturned / 24);
 
     return (
-        <header className="glass text-white p-4 shadow-xl shrink-0 z-10 sticky top-0">
-            <div className="max-w-7xl mx-auto flex flex-col gap-4">
-                {/* Top Row: Logo & Main Controls */}
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                    {/* Logo & Info */}
+        <div className="flex flex-col shrink-0">
+            {/* Fixed Top Section: Branding & Status */}
+            <div className="sticky top-0 z-50 bg-slate-900 shadow-md border-b border-slate-800">
+                <div className="max-w-7xl mx-auto p-4">
                     <div className="flex items-center gap-3">
-                        <div className="bg-gradient-to-br from-blue-500 to-blue-700 p-2.5 rounded-xl shadow-lg">
+                        <div className="bg-gradient-to-br from-blue-500 to-blue-700 p-2.5 rounded-xl shadow-lg shrink-0">
                             <CloudRain className="text-white" size={26} />
                         </div>
-                        <div>
-                            <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+                        <div className="min-w-0 flex-1">
+                            <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent truncate">
                                 Ice Storm Monitor
                             </h1>
                             <div className="flex items-center gap-2 text-xs text-blue-200 flex-wrap mt-0.5">
                                 {location.name && (
-                                    <span className="bg-blue-900/50 px-2 py-0.5 rounded-full border border-blue-700/50 flex items-center gap-1.5">
+                                    <span className="bg-blue-900/50 px-2 py-0.5 rounded-full border border-blue-700/50 flex items-center gap-1.5 whitespace-nowrap">
                                         <MapPin size={10} />
                                         {location.name}
                                     </span>
                                 )}
                                 {hoursReturned > 0 && (
-                                    <>
+                                    <span className="flex items-center gap-1 whitespace-nowrap">
                                         <span className="text-blue-400">•</span>
                                         <span className="text-blue-300 hidden sm:inline">{daysInForecast}-Day / {hoursReturned}h Forecast</span>
                                         <span className="text-blue-300 sm:hidden">{daysInForecast}d / {hoursReturned}h</span>
-                                    </>
+                                    </span>
                                 )}
                                 {metrics.dateRange && (
-                                    <>
+                                    <span className="flex items-center gap-1 whitespace-nowrap">
                                         <span className="text-blue-400">•</span>
                                         <span className="flex items-center gap-1 text-slate-400">
                                             <Calendar size={10} /> {metrics.dateRange}
                                         </span>
-                                    </>
+                                    </span>
                                 )}
                                 {isDemoData && (
                                     <span className="bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded-full border border-yellow-500/30 text-xs font-semibold uppercase tracking-wider">
@@ -131,131 +130,127 @@ export function Header({
                             </div>
                         </div>
                     </div>
-
-                    {/* Main Controls */}
-                    <div className="flex flex-wrap items-center gap-2">
-                        {/* Last Fetch Time - hidden on mobile */}
-                        {lastFetchTime && !isDemoData && (
-                            <span className="text-xs text-slate-400 hidden lg:block mr-2">
-                                Updated {formatLastFetch(lastFetchTime)}
-                            </span>
-                        )}
-
-                        {/* Controls Group */}
-                        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end mt-2 sm:mt-0">
-                            {/* API Key Input - compacted on mobile */}
-                            <div className="relative flex-1 sm:flex-none">
-                                <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
-                                    <Lock size={13} className="text-slate-500" />
-                                </div>
-                                <input
-                                    type="password"
-                                    placeholder="API Key"
-                                    value={apiKey}
-                                    onChange={(e) => setApiKey(e.target.value)}
-                                    className="w-full sm:w-32 bg-slate-800/80 border border-slate-700 text-xs sm:text-sm text-white rounded-lg pl-8 pr-2 py-1.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-500"
-                                />
-                            </div>
-
-                            <div className="flex items-center gap-1.5">
-                                {/* CSV Export Button */}
-                                {hasData && (
-                                    <>
-                                        <button
-                                            onClick={() => { console.log('CSV button clicked'); onExportCSV(); }}
-                                            className="flex items-center justify-center w-8 h-8 sm:w-auto sm:h-auto sm:gap-1.5 sm:px-3 sm:py-1.5 rounded-lg text-sm font-medium bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700"
-                                            title="Download CSV"
-                                            aria-label="Download CSV"
-                                        >
-                                            <Download size={14} />
-                                            <span className="hidden sm:inline">CSV</span>
-                                        </button>
-                                        <button
-                                            onClick={() => { console.log('JSON button clicked'); onExportJSON(); }}
-                                            className="flex items-center justify-center w-8 h-8 sm:w-auto sm:h-auto sm:gap-1.5 sm:px-3 sm:py-1.5 rounded-lg text-sm font-medium bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700"
-                                            title="Download JSON"
-                                            aria-label="Download JSON"
-                                        >
-                                            <FileJson size={14} />
-                                            <span className="hidden sm:inline">JSON</span>
-                                        </button>
-                                    </>
-                                )}
-
-                                {/* Theme Toggle */}
-                                <button
-                                    onClick={cycleTheme}
-                                    className="flex items-center justify-center w-8 h-8 sm:w-auto sm:h-auto sm:gap-1.5 sm:px-3 sm:py-1.5 rounded-lg text-sm font-medium bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700"
-                                    title={`Theme: ${theme}`}
-                                    aria-label={`Switch to ${theme === 'dark' ? 'system' : theme === 'light' ? 'dark' : 'light'} theme`}
-                                >
-                                    <ThemeIcon size={14} />
-                                </button>
-
-                                {/* Refresh Button */}
-                                <button
-                                    onClick={() => onRefresh(true)}
-                                    disabled={loading}
-                                    className={`flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all
-                                        ${loading
-                                            ? 'bg-slate-700 text-slate-400 cursor-wait'
-                                            : 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white shadow-lg shadow-blue-500/25'
-                                        }`}
-                                    title={isCached ? 'Force refresh from API' : 'Refresh forecast'}
-                                    aria-label="Refresh forecast"
-                                >
-                                    <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-                                    <span className={loading ? 'hidden sm:inline' : ''}>{loading ? 'Loading...' : 'Refresh'}</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Bottom Row: Location Search */}
-                <div className="flex flex-wrap items-center gap-2">
-                    {/* Location Search */}
-                    <div className="relative flex-1 min-w-[200px] max-w-md">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            {searchingLocation ? (
-                                <Loader2 size={14} className="text-blue-400 animate-spin" />
-                            ) : (
-                                <Search size={14} className="text-slate-500" />
-                            )}
-                        </div>
-                        <input
-                            type="text"
-                            placeholder="Enter zip code, city, or address..."
-                            value={locationQuery}
-                            onChange={(e) => setLocationQuery(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            disabled={searchingLocation}
-                            className="w-full bg-slate-800/80 border border-slate-700 text-sm text-white rounded-lg pl-9 pr-20 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-500 disabled:opacity-50"
-                        />
-                        <button
-                            onClick={handleLocationSearch}
-                            disabled={searchingLocation || !locationQuery.trim()}
-                            className="absolute inset-y-0 right-0 px-3 flex items-center text-xs font-semibold text-blue-400 hover:text-blue-300 disabled:text-slate-500 disabled:cursor-not-allowed transition-colors"
-                        >
-                            Search
-                        </button>
-                    </div>
-
-                    {/* GPS Button */}
-                    <button
-                        onClick={onGeolocate}
-                        disabled={geolocating}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700 disabled:opacity-50"
-                        title="Use current location"
-                    >
-                        <Navigation size={14} className={geolocating ? 'animate-pulse text-blue-400' : ''} />
-                        <span>{geolocating ? 'Locating...' : 'Use My Location'}</span>
-                    </button>
-
-                    {/* Coordinates Display */}
-
                 </div>
             </div>
-        </header>
+
+            {/* Scrolling Bottom Section: Controls */}
+            <div className="bg-slate-900 border-b border-slate-800/50 shadow-xl">
+                <div className="max-w-7xl mx-auto p-4 pt-2">
+                    <div className="flex flex-col gap-4">
+                        {/* Status Bar */}
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                            {/* Last Fetch Time */}
+                            {lastFetchTime && !isDemoData ? (
+                                <div className="text-xs text-slate-400 flex items-center gap-2">
+                                    <Clock size={12} />
+                                    Updated {formatLastFetch(lastFetchTime)}
+                                </div>
+                            ) : <div></div>} {/* Spacer */}
+
+                            {/* Main Controls Row */}
+                            <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+                                {/* API Key Input */}
+                                <div className="relative flex-1 min-w-[140px]">
+                                    <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                                        <Lock size={13} className="text-slate-500" />
+                                    </div>
+                                    <input
+                                        type="password"
+                                        placeholder="API Key"
+                                        value={apiKey}
+                                        onChange={(e) => setApiKey(e.target.value)}
+                                        className="w-full bg-slate-800/80 border border-slate-700 text-xs sm:text-sm text-white rounded-lg pl-8 pr-2 py-1.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-500"
+                                    />
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                    {hasData && (
+                                        <>
+                                            <button
+                                                onClick={onExportCSV}
+                                                className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-300 hover:bg-slate-800 border border-slate-700 bg-slate-900 transition-colors"
+                                                title="Download CSV"
+                                                aria-label="Download CSV"
+                                            >
+                                                <Download size={14} />
+                                            </button>
+                                            <button
+                                                onClick={onExportJSON}
+                                                className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-300 hover:bg-slate-800 border border-slate-700 bg-slate-900 transition-colors"
+                                                title="Download JSON"
+                                                aria-label="Download JSON"
+                                            >
+                                                <FileJson size={14} />
+                                            </button>
+                                        </>
+                                    )}
+
+                                    <button
+                                        onClick={cycleTheme}
+                                        className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-300 hover:bg-slate-800 border border-slate-700 bg-slate-900 transition-colors"
+                                        title={`Theme: ${theme}`}
+                                    >
+                                        <ThemeIcon size={14} />
+                                    </button>
+
+                                    <button
+                                        onClick={() => onRefresh(true)}
+                                        disabled={loading}
+                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all
+                                            ${loading
+                                                ? 'bg-slate-800 text-slate-500 cursor-wait border border-slate-700'
+                                                : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20'
+                                            }`}
+                                    >
+                                        <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                                        <span className="hidden sm:inline">{loading ? 'Loading...' : 'Refresh'}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Location Search Bar - Full Width on Mobile, Auto on Desktop if needed, but here full width looks good for accessibility */}
+                        <div className="flex gap-2">
+                            <div className="relative flex-1">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    {searchingLocation ? (
+                                        <Loader2 size={14} className="text-blue-400 animate-spin" />
+                                    ) : (
+                                        <Search size={14} className="text-slate-500" />
+                                    )}
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder="Enter zip code, city, or address..."
+                                    value={locationQuery}
+                                    onChange={(e) => setLocationQuery(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    disabled={searchingLocation}
+                                    className="w-full bg-slate-800/50 border border-slate-700 text-sm text-white rounded-lg pl-9 pr-20 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-500"
+                                />
+                                <button
+                                    onClick={handleLocationSearch}
+                                    disabled={searchingLocation || !locationQuery.trim()}
+                                    className="absolute inset-y-0 right-0 px-4 text-xs font-semibold text-blue-400 hover:text-blue-300 disabled:text-slate-600 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    Search
+                                </button>
+                            </div>
+
+                            <button
+                                onClick={onGeolocate}
+                                disabled={geolocating}
+                                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-slate-800/50 hover:bg-slate-800 text-slate-300 transition-all border border-slate-700 whitespace-nowrap"
+                            >
+                                <Navigation size={14} className={geolocating ? 'animate-pulse text-blue-400' : ''} />
+                                <span className="hidden sm:inline">{geolocating ? 'Locating...' : 'Use My Location'}</span>
+                                <span className="sm:hidden">GPS</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }
