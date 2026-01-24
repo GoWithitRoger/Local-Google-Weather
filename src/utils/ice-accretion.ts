@@ -120,5 +120,10 @@ export function calculateProvisionalAccretion(
     _windSpeed: number,
     _dewPoint?: number
 ): number {
+    // Satisfy linter for unused vars in deprecated placeholder
+    void _qpf;
+    void _wetBulb;
+    void _windSpeed;
+    void _dewPoint;
     return 0; // Disabled to prevent fallback errors
 }

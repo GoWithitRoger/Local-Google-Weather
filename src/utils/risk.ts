@@ -37,7 +37,7 @@ export function calculateRiskScore(radialIceThickness: number, windGust: number)
     }
 
     // 2. Determine Wind Stress Multiplier
-    let windMultiplier = WIND_STRESS_MULTIPLIERS.LOW;
+    let windMultiplier: number = WIND_STRESS_MULTIPLIERS.LOW;
 
     if (windGust >= 45) {
         windMultiplier = WIND_STRESS_MULTIPLIERS.EXTREME;
