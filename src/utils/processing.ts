@@ -38,7 +38,10 @@ export function processWeatherData(forecastHours: ForecastHour[]): ChartDataPoin
         const fullDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         const time = date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
         const hourOfDay = date.getHours();
-        const isDaytime = hourOfDay >= 7 && hourOfDay < 19;
+        // Use API provided isDaytime, or fallback to rough estimate
+        const isDaytime = typeof hour.isDaytime === 'boolean'
+            ? hour.isDaytime
+            : (hourOfDay >= 7 && hourOfDay < 19);
 
         // Temperature
         const temp = getNumericValue(hour.temperature, 'degrees');
@@ -219,6 +222,7 @@ export function processWeatherData(forecastHours: ForecastHour[]): ChartDataPoin
             riskScore,
             thunderstormProbability: hour.thunderstormProbability ?? 0,
             flashFreezeRisk,
+            isDaytime,
         });
     }
 

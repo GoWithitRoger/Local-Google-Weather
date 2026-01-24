@@ -166,6 +166,9 @@ export interface ChartDataPoint {
     thunderstormProbability: number;
     /** Flash freeze risk level */
     flashFreezeRisk: FlashFreezeRisk;
+
+    // Theme
+    isDaytime: boolean;
 }
 
 /**

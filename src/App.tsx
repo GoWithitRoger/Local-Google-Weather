@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { calculateMetrics } from '@/utils';
 import { useWeatherData } from '@/hooks/useWeatherData';
 import {
@@ -68,6 +68,26 @@ export default function App() {
     // Let's do the slicing logic now.
 
     const displayedMetrics = calculateMetrics(displayedData);
+
+    // Theme Management
+    useEffect(() => {
+        if (!chartData.length) return;
+
+        // Find the current hour's data point
+        const now = new Date();
+        const currentHour = chartData.find(d => {
+            const time = new Date(d.fullDate);
+            return Math.abs(time.getTime() - now.getTime()) < 30 * 60 * 1000; // Within 30 mins
+        }) || chartData[0]; // Fallback to first available if closest not found (e.g. data starts in future)
+
+        if (currentHour) {
+            if (currentHour.isDaytime) {
+                document.documentElement.classList.remove('dark');
+            } else {
+                document.documentElement.classList.add('dark');
+            }
+        }
+    }, [chartData]);
 
     return (
         <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors">
