@@ -139,7 +139,7 @@ export default function App() {
                             {/* Charts & Alerts Grid */}
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                                 {/* Charts Section - Takes 2 columns */}
-                                <div className="lg:col-span-2 card overflow-hidden flex flex-col h-[600px]">
+                                <div className="lg:col-span-3 card overflow-hidden flex flex-col h-[600px]">
                                     {/* Tabs & Controls */}
                                     <div className="flex flex-col sm:flex-row border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
                                         <div
@@ -219,10 +219,11 @@ export default function App() {
                                     </div>
                                 </div>
 
-                                {/* Alerts Panel - Takes 1 column */}
+                                {/* Alerts Panel - Takes 1 column (Disabled)
                                 <div className="lg:col-span-1">
                                     <AlertsPanel alerts={alerts} />
                                 </div>
+                                */}
                             </div>
 
                             {/* Raw Data Inspector */}
