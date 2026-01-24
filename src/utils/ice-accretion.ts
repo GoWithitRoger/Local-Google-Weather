@@ -91,11 +91,13 @@ export function calculatePreciseAccretion(
     // Total Cooling Available to Freeze Water (W/m2)
     const total_cooling = q_c + q_e + q_s;
 
-    // 5. Solve for Freezing Fraction (Alpha)
+    // 5. Solve for Freezing Fraction (Alpha) - CORRECTION APPLIED HERE
     // Heat Balance: Alpha * Flux * L_f = Total_Cooling
     let alpha = 0;
     if (J_imp > 0) {
-        alpha = total_cooling / (J_imp * L_f);
+        // Multiply total_cooling by PI because cooling happens on the surface area (PI*D)
+        // while latent heat gain happens on the cross-section (D).
+        alpha = (total_cooling * PI) / (J_imp * L_f);
     }
 
     // Bound Alpha between 0 (wet, dripping) and 1.0 (all freezes / rime)
