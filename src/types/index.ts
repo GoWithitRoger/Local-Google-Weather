@@ -196,6 +196,8 @@ export interface ForecastMetrics {
     maxSnowDepth: number;
     /** Total radial wire ice accretion (inches) */
     totalRadialWireIce: number;
+    /** Flash freeze risk level: 'NONE', 'HIGH: Flash Freeze', or 'SEVERE: Snow Covering Ice' */
+    flashFreezeRisk: string;
 }
 
 /**

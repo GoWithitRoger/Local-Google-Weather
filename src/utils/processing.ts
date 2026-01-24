@@ -4,6 +4,7 @@ import { calculateRiskScore } from './risk';
 import { calculatePreciseAccretion } from './ice-accretion';
 import { calculateStreetIceBurnoff, getRoadIceStatus } from './street-ice';
 import { calculateSnowMeltRate, getSnowStatus, calculateSnowCompaction } from './snow-melt';
+import { detectFlashFreezeRisk } from './road-weather';
 
 // ============================================================================
 // DATA PROCESSING
@@ -216,6 +217,7 @@ export function calculateMetrics(chartData: ChartDataPoint[]): ForecastMetrics {
             roadClearTime: null,
             maxSnowDepth: 0,
             totalRadialWireIce: 0,
+            flashFreezeRisk: 'NONE',
         };
     }
 
@@ -282,6 +284,7 @@ export function calculateMetrics(chartData: ChartDataPoint[]): ForecastMetrics {
         roadClearTime,
         maxSnowDepth: peakSnowDepth,  // "Max Depth" -> peak from bucket model
         totalRadialWireIce,
+        flashFreezeRisk: detectFlashFreezeRisk(chartData),
     };
 }
 

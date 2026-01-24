@@ -45,3 +45,6 @@ export {
     downloadCSV,
     downloadJSON,
 } from './export';
+
+// Road weather hazards
+export { detectFlashFreezeRisk } from './road-weather';
