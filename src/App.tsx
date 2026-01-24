@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { processWeatherData, calculateMetrics, generateAlerts, downloadCSV, downloadJSON } from '@/utils';
+import { calculateMetrics } from '@/utils';
 import { useWeatherData } from '@/hooks/useWeatherData';
 import {
     Header,
@@ -26,7 +26,6 @@ export default function App() {
     // Weather data hook
     const {
         chartData,
-        metrics,
         alerts,
         rawData,
         loading,
@@ -34,7 +33,6 @@ export default function App() {
         isDemoData,
         isCached,
         lastFetchTime,
-        hoursReturned,
         location,
         searchLocation,
         searchingLocation,
