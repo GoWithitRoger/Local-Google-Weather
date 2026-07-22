@@ -18,7 +18,7 @@ export function EmptyState({ loading, onLoadDemo, onGeolocate, isLocating }: Emp
                     Loading Forecast Data...
                 </h3>
                 <p className="text-slate-500 dark:text-slate-400 mt-1">
-                    Connecting to WeatherNext AI
+                    Connecting to Google Weather API
                 </p>
             </div>
         );

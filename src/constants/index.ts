@@ -47,7 +47,7 @@ export const WIND_STRESS_MULTIPLIERS = {
 } as const;
 
 /**
- * Risk score weights - contributes to 0-100 outage probability
+ * Risk score weights - contributes to a 0-100 relative project score
  */
 export const RISK_WEIGHTS = {
     ICE_LIGHT: 10,

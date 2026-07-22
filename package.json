@@ -1,7 +1,7 @@
 {
   "name": "ice-storm-monitor",
   "version": "1.0.0",
-  "description": "Real-time ice storm monitoring and power outage risk assessment dashboard",
+  "description": "Hobby dashboard for exploring ice, wind, and winter-weather risk indicators",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -37,7 +37,7 @@
   "keywords": [
     "weather",
     "ice-storm",
-    "power-outage",
+    "winter-weather",
     "dashboard",
     "react",
     "typescript"

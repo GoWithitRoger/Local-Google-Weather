@@ -3,12 +3,12 @@ import type { RiskLevel } from '@/types';
 
 // ============================================================================
 // RISK CALCULATION
-// Functions for calculating and classifying power outage risk
+// Functions for calculating and classifying the project's ice-and-wind risk score
 // Uses a Multiplicative Stress Model: Risk = (Ice Load) × (Wind Factor)
 // ============================================================================
 
 /**
- * Calculate power outage risk score based on RADIAL ice and wind
+ * Calculate a relative risk score based on radial ice and wind
  * Uses a Multiplicative Stress Model (Ice Load × Wind Factor)
  * 
  * Physics: Wind stress on ice-coated lines is multiplicative, not additive.

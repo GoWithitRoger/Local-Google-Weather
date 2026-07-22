@@ -60,7 +60,7 @@ export function AlertsPanel({ alerts }: AlertsPanelProps) {
         <div className="space-y-3 animate-fade-in">
             <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2">
                 <AlertTriangle size={16} className="text-amber-500" />
-                Weather Alerts ({visibleAlerts.length})
+                Condition Flags ({visibleAlerts.length})
             </h3>
 
             {visibleAlerts.map((alert, index) => {
