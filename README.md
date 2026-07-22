@@ -16,7 +16,7 @@ National Weather Service guidance and emergency alerts for real-world decisions.
 - Supports location search, browser geolocation, dark mode, and CSV/JSON export.
 - Includes demo data so the interface can be explored without an API key.
 
-I built this as a hobby project for watching local winter weather. Bug reports and small
+This is a hobby project for watching local winter weather. Bug reports and small
 improvements are welcome, but the calculations are not safety advice.
 
 ## Run locally
@@ -51,7 +51,7 @@ npm run build
 ## How the score works
 
 The dashboard combines estimated radial ice accretion with wind thresholds to produce a relative
-score from 0 to 100. The thresholds draw on common ice-storm impact categories, but the result has
+score from 0–100. The thresholds draw on common ice-storm impact categories, but the result has
 not been calibrated as an outage probability.
 
 The implementation lives in `src/utils/` and `src/constants/` so the assumptions remain visible and
