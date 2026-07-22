@@ -88,7 +88,7 @@ export function RiskCharts({ data, metrics }: RiskChartsProps) {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
                     <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
                         <ShieldAlert size={16} className="text-orange-500" />
-                        Outage Risk & Precipitation
+                        Ice/Wind Risk & Precipitation
                     </h4>
                     <div className="flex gap-4 text-xs font-medium text-slate-500 dark:text-slate-400">
                         <div className="flex items-center gap-1.5">
@@ -116,7 +116,7 @@ export function RiskCharts({ data, metrics }: RiskChartsProps) {
 
                 <div
                     role="img"
-                    aria-label="Combined chart showing outage risk percentage and ice accumulation over time"
+                    aria-label="Combined chart showing the ice and wind risk score with ice accumulation over time"
                     className="h-[90%]"
                 >
                     <ResponsiveContainer width="100%" height="100%">
@@ -226,7 +226,7 @@ export function RiskCharts({ data, metrics }: RiskChartsProps) {
                                 stroke="#ef4444"
                                 strokeWidth={2}
                                 fill="url(#colorRisk)"
-                                name="Outage Risk %"
+                                name="Ice/Wind Risk Score"
                             />
                             <Bar
                                 yAxisId="left"

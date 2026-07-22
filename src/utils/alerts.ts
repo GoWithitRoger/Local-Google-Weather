@@ -20,8 +20,8 @@ export function generateAlerts(_chartData: ChartDataPoint[], metrics: ForecastMe
         alerts.push({
             id: 'critical-risk',
             severity: 'danger',
-            title: 'Critical Power Outage Risk',
-            message: `Peak risk of ${metrics.maxRisk.toFixed(0)}% expected ${metrics.peakRiskTime}. Prepare emergency supplies.`,
+            title: 'High Ice/Wind Risk Score',
+            message: `The project score peaks at ${metrics.maxRisk.toFixed(0)} around ${metrics.peakRiskTime}. Check official local forecasts for guidance.`,
             time: now,
             metric: 'risk',
             value: metrics.maxRisk,

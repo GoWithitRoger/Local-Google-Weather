@@ -53,19 +53,7 @@ export default function App() {
     // Slice data based on selected duration
     const displayedData = chartData.slice(0, forecastDays * 24);
     const displayedHours = displayedData.length;
-
-    // Recalculate metrics for the specific slice
-    // We need to import calculateMetrics if not already available in scope from useWeatherData 
-    // BUT useWeatherData returns calculated metrics for the WHOLE set.
-    // We should probably recalculate for the displayed set to make the KPIs accurate to the view.
-    // Since calculateMetrics is imported in useWeatherData from @/utils, let's import it here too.
-    // Wait, I need to check imports.
-    // ... Actually, I'll update the imports in a separate Edit if needed, but for now assuming I can add it.
-    // Let's check imports first in next step or assume I need to add it.
-    // The previous view_file showed `import { ... } from '@/components';` and `import { useWeatherData } from ...`
-    // I need to add `calculateMetrics` to imports. 
-
-    // Let's do the slicing logic now.
+    // Recalculate the summary for the selected forecast window.
 
     const displayedMetrics = calculateMetrics(displayedData);
 
@@ -139,7 +127,7 @@ export default function App() {
                             {/* Charts & Alerts Grid */}
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                                 {/* Charts Section - Takes 2 columns */}
-                                <div className="lg:col-span-3 card overflow-hidden flex flex-col h-[600px]">
+                                <div className="lg:col-span-2 card overflow-hidden flex flex-col h-[600px]">
                                     {/* Tabs & Controls */}
                                     <div className="flex flex-col sm:flex-row border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
                                         <div
@@ -219,11 +207,10 @@ export default function App() {
                                     </div>
                                 </div>
 
-                                {/* Alerts Panel - Takes 1 column (Disabled)
+                                {/* Condition flags */}
                                 <div className="lg:col-span-1">
                                     <AlertsPanel alerts={alerts} />
                                 </div>
-                                */}
                             </div>
 
                             {/* Raw Data Inspector */}
