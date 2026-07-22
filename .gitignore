@@ -29,3 +29,14 @@ npm-debug.log*
 # Generated files
 repomix-output.xml
 *.csv
+
+# Local agent and debugging artifacts
+.agent/
+scripts/setup-agent-browser.sh
+analyze_data.cjs
+debug*.js
+debug*.png
+final_verification.png
+hourly_tab.png
+verification_*.png
+weather-data-*.json
